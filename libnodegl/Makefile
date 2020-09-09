@@ -129,6 +129,7 @@ LIB_OBJS = animation.o              \
            rendertarget.o           \
            rnode.o                  \
            serialize.o              \
+           swapchain.o	            \
            texture.o                \
            transforms.o             \
            utils.o                  \
@@ -209,6 +210,8 @@ LIB_OBJS_VK += buffer_vk.o          \
                texture_vk.o         \
                topology_vk.o        \
                rendertarget_vk.o    \
+               swapchain_vk.o       \
+               util_vk.o            \
                vkcontext.o          \
 
 LIB_OBJS                        += $(LIB_OBJS_VK)

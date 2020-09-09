@@ -85,4 +85,5 @@ void ngli_gctx_vk_end_render_pass(struct gctx *s);
 int ngli_gctx_vk_begin_transient_command(struct gctx *s, VkCommandBuffer *command_buffer);
 int ngli_gctx_vk_execute_transient_command(struct gctx *s, VkCommandBuffer command_buffer);
 
+int on_swapchain_reset(struct gctx* s);
 #endif
