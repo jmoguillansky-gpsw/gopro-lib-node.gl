@@ -1284,6 +1284,9 @@ const struct gctx_class ngli_gctx_vk = {
     .buffer_create = ngli_buffer_vk_create,
     .buffer_init   = ngli_buffer_vk_init,
     .buffer_upload = ngli_buffer_vk_upload,
+    .buffer_download = ngli_buffer_vk_download,
+    .buffer_map      = ngli_buffer_vk_map,
+    .buffer_unmap    = ngli_buffer_vk_unmap,
     .buffer_freep  = ngli_buffer_vk_freep,
 
     .gtimer_create = ngli_gtimer_vk_create,

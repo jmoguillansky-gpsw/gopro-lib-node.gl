@@ -60,7 +60,7 @@ int ngli_buffer_vk_init(struct buffer *s, int size, int usage)
     };
     VkResult res = vkCreateBuffer(vk->device, &buffer_create_info, NULL, &s_priv->buffer);
     if (res != VK_SUCCESS)
-        return -1;
+        return NGL_ERROR_GENERIC;
 
     VkMemoryRequirements requirements;
     vkGetBufferMemoryRequirements(vk->device, s_priv->buffer, &requirements);
@@ -92,18 +92,49 @@ int ngli_buffer_vk_init(struct buffer *s, int size, int usage)
 
 int ngli_buffer_vk_upload(struct buffer *s, const void *data, int size)
 {
+    void *dst;
+    VkResult res = ngli_buffer_map(s, size, 0, &dst);
+    if (res != VK_SUCCESS)
+        return NGL_ERROR_GENERIC;
+    memcpy(dst, data, size);
+    ngli_buffer_unmap(s);
+
+    return 0;
+}
+
+int ngli_buffer_vk_download(struct buffer* s, void* data, uint32_t size, uint32_t offset) {
+    void* src;
+    int ret = ngli_buffer_map(s, size, offset, &src);
+        if (ret < 0)
+            return ret;
+    memcpy(data, src + offset, size);
+    ngli_buffer_unmap(s);
+    return 0;
+}
+
+int ngli_buffer_vk_map(struct buffer *s, int size, uint32_t offset, void** data)
+{
     struct gctx_vk *gctx_vk = (struct gctx_vk *)s->gctx;
     struct vkcontext *vk = gctx_vk->vkcontext;
     struct buffer_vk *s_priv = (struct buffer_vk *)s;
 
-    void *dst;
-    VkResult res = vkMapMemory(vk->device, s_priv->memory, 0, size, 0, &dst);
+    if (!data) {
+        LOG(ERROR, "data is NULL");
+        return NGL_ERROR_GENERIC;
+    }
+    VkResult res = vkMapMemory(vk->device, s_priv->memory, offset, size, 0, data);
     if (res != VK_SUCCESS)
-        return -1;
-    memcpy(dst, data, size);
-    vkUnmapMemory(vk->device, s_priv->memory);
+        return NGL_ERROR_GENERIC;
 
     return 0;
+}
+
+void ngli_buffer_vk_unmap(struct buffer* s) {
+    struct gctx_vk *gctx_vk = (struct gctx_vk *)s->gctx;
+    struct vkcontext *vk = gctx_vk->vkcontext;
+    struct buffer_vk *s_priv = (struct buffer_vk *)s;
+
+    vkUnmapMemory(vk->device, s_priv->memory);
 }
 
 void ngli_buffer_vk_freep(struct buffer **sp)
