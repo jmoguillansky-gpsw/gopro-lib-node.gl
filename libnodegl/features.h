@@ -52,7 +52,7 @@
 #define NGLI_FEATURE_ROW_LENGTH                   (1 << 27)
 #define NGLI_FEATURE_SOFTWARE                     (1 << 28)
 #define NGLI_FEATURE_UINT_UNIFORMS                (1 << 29)
-
+#define NGLI_FEATURE_MAP_BUFFER                   (1 << 30)
 #define NGLI_FEATURE_COMPUTE_SHADER_ALL (NGLI_FEATURE_COMPUTE_SHADER           | \
                                          NGLI_FEATURE_PROGRAM_INTERFACE_QUERY  | \
                                          NGLI_FEATURE_SHADER_IMAGE_LOAD_STORE  | \
