@@ -19,7 +19,9 @@
  * under the License.
  */
 #pragma once
-#include <sxplayer.hpp>
+extern "C" {
+#include <sxplayer.h>
+}
 #include <string>
 #include <memory>
 

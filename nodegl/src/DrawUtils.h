@@ -22,6 +22,7 @@
 #pragma once
 #include <stdint.h>
 #include <string>
+#include <cstring>
 #include <memory>
 #include <glm/glm.hpp>
 #include "DebugUtil.h"
