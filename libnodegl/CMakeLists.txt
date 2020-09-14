@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.10)
+project (nodegl)
+
+file (GLOB_RECURSE NODEGL_SRC_FILES *.c *.h)
+
+list (FILTER NODEGL_SRC_FILES EXCLUDE REGEX "android_.*$")
+list (FILTER NODEGL_SRC_FILES EXCLUDE REGEX "_wgl.*.c$")
+list (FILTER NODEGL_SRC_FILES EXCLUDE REGEX "_ios.*.c$")
+list (FILTER NODEGL_SRC_FILES EXCLUDE REGEX "jni_")
+list (FILTER NODEGL_SRC_FILES EXCLUDE REGEX "vaapi.*$")
+list (FILTER NODEGL_SRC_FILES EXCLUDE REGEX "_darwin.*.c$")
+list (FILTER NODEGL_SRC_FILES EXCLUDE REGEX "_mediacodec.*.c$")
+#list (FILTER NODEGL_SRC_FILES EXCLUDE REGEX "_egl.*.c$")
+list (FILTER NODEGL_SRC_FILES EXCLUDE REGEX "gen_specs.c$")
+list (FILTER NODEGL_SRC_FILES EXCLUDE REGEX "test_.*.c$")
+
+set(NODEGL_BUILD_TYPE SHARED)
+
+add_library(nodegl ${NODEGL_BUILD_TYPE} ${NODEGL_SRC_FILES})
+target_compile_options(nodegl PUBLIC -DTARGET_LINUX -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_EGL -fPIC -g -Wall)
+target_link_libraries(nodegl PUBLIC ${SXPLAYER_LIBS} vulkan shaderc_shared GL EGL)

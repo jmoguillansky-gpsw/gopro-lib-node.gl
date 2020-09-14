@@ -8,3 +8,4 @@ sxplayer*
 *.gcda
 *.gcno
 ngl-cov/
+cmake-build-debug
