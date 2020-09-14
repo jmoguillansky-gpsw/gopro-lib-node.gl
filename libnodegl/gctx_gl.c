@@ -43,6 +43,8 @@
 #include "vaapi.h"
 #endif
 
+#define ENABLE_DEBUG
+
 static void capture_default(struct gctx *s)
 {
     struct gctx_gl *s_priv = (struct gctx_gl *)s;
@@ -219,6 +221,24 @@ static struct gctx *gl_create(const struct ngl_config *config)
     return (struct gctx *)s;
 }
 
+#ifdef ENABLE_DEBUG
+#define GL_DEBUG_LOG(log_level, ...) ngli_log_print(log_level, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+
+static void debug_message_callback( GLenum source,
+                 GLenum type,
+                 GLuint id,
+                 GLenum severity,
+                 GLsizei length,
+                 const GLchar* message,
+                 const void* userParam )
+{
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
+    GL_DEBUG_LOG((type == GL_DEBUG_TYPE_ERROR) ? NGL_LOG_ERROR : NGL_LOG_INFO, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+            type, severity, message );
+}
+#endif
+
 static int gl_init(struct gctx *s)
 {
     int ret;
@@ -230,6 +250,14 @@ static int gl_init(struct gctx *s)
         return NGL_ERROR_MEMORY;
 
     struct glcontext *gl = s_priv->glcontext;
+
+#ifdef ENABLE_DEBUG
+    if ((gl->features & NGLI_FEATURE_GL_KHR_DEBUG)) {
+        ngli_glEnable(gl, GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        ngli_glDebugMessageCallback(gl, debug_message_callback, NULL);
+    }
+#endif
+
     s->features = gl->features;
 
     if (gl->offscreen) {
