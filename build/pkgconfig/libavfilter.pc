@@ -1,0 +1,11 @@
+prefix=/c/Users/jmoguillansky/Downloads/ffmpeg-20200831-4a11a6f-win64-dev/ffmpeg-20200831-4a11a6f-win64-dev/
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+Cflags: -I${includedir}
+
+Name: libavfilter
+Version: 100.0.0
+Libs: -L${libdir} -lavfilter
+Libs.private: 
+Description: 

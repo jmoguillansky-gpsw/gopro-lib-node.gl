@@ -134,6 +134,9 @@ tests: ngl-tools-install pynodegl-utils-install nodegl-tests
 nodegl-%: nodegl-install
 	(. $(ACTIVATE) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig LDFLAGS=$(RPATH_LDFLAGS) $(MAKE) -C libnodegl $(subst nodegl-,,$@) DEBUG=$(DEBUG))
 
+debug-env:
+	(. $(ACTIVATE) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig LDFLAGS=$(RPATH_LDFLAGS) $(MAKE) -C libnodegl debug-env)
+
 clean_py:
 	$(RM) pynodegl/nodes_def.pyx
 	$(RM) pynodegl/pynodegl.c

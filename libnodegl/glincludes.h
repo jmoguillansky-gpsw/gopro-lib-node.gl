@@ -59,6 +59,13 @@
 # define NGL_OGL3_COMPAT_INCLUDES 1
 #endif
 
+#ifdef TARGET_MINGW_W64
+# include <GL/gl.h>
+# include <GL/glcorearb.h>
+# include <GL/glext.h>
+# define NGL_OGL3_COMPAT_INCLUDES 1
+#endif
+
 #ifndef GL_OES_EGL_image
 typedef void* GLeglImageOES;
 #endif

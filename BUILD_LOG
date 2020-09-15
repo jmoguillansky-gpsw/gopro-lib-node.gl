@@ -1,0 +1,450 @@
+tar xf sxplayer-9.5.1.tar.gz
+PKG_CONFIG_PATH=/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/lib/pkgconfig LDFLAGS="-Wl,-rpath,/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/lib " make -C sxplayer install PREFIX=/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env DEBUG=no SHARED=yes INSTALL="install -C"
+make[1]: Entering directory '/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/sxplayer'
+install -C -d /c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/lib
+install -C -d /c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/lib/pkgconfig
+install -C -d /c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include
+install -C -d /c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/bin
+install -C -m 644 libsxplayer.dll /c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/bin
+install -C -m 644 libsxplayer.dll /c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/lib
+install -C -m 644 libsxplayer.pc /c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/lib/pkgconfig
+install -C -m 644 sxplayer.h /c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include/sxplayer.h
+install -C -m 644 sxplayer.hpp /c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include/sxplayer.hpp
+make[1]: Leaving directory '/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/sxplayer'
+PKG_CONFIG_PATH=/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/lib/pkgconfig LDFLAGS="-Wl,-rpath,/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/lib " make -C libnodegl install PREFIX=/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env DEBUG=no SHARED=yes INSTALL="install -C"
+make[1]: Entering directory '/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/libnodegl'
+make[1]: Warning: File 'animation.c' has modification time 19305 s in the future
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o animation.o animation.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o api.o api.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o block.o block.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o bstr.o bstr.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o buffer.o buffer.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o colorconv.o colorconv.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o darray.o darray.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o deserialize.o deserialize.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o dot.o dot.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o drawutils.o drawutils.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o format.o format.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o gctx.o gctx.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o gtimer.o gtimer.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o hmap.o hmap.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o hwconv.o hwconv.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o hwupload.o hwupload.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o hwupload_common.o hwupload_common.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o image.o image.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o log.o log.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o math_utils.o math_utils.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o memory.o memory.c
+memory.c: In function ‘ngli_malloc_aligned’:
+memory.c:87:11: warning: implicit declaration of function ‘_aligned_malloc’ [-Wimplicit-function-declaration]
+   87 |     ptr = _aligned_malloc(size, NGLI_ALIGN_VAL);
+      |           ^~~~~~~~~~~~~~~
+memory.c:87:9: warning: assignment to ‘void *’ from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+   87 |     ptr = _aligned_malloc(size, NGLI_ALIGN_VAL);
+      |         ^
+memory.c: In function ‘ngli_free_aligned’:
+memory.c:116:5: warning: implicit declaration of function ‘_aligned_free’ [-Wimplicit-function-declaration]
+  116 |     _aligned_free(ptr);
+      |     ^~~~~~~~~~~~~
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_animatedbuffer.o node_animatedbuffer.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_animated.o node_animated.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_animkeyframe.o node_animkeyframe.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_block.o node_block.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_buffer.o node_buffer.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_camera.o node_camera.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_circle.o node_circle.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_compute.o node_compute.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_computeprogram.o node_computeprogram.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_geometry.o node_geometry.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_graphicconfig.o node_graphicconfig.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_group.o node_group.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_hud.o node_hud.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_identity.o node_identity.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_io.o node_io.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_media.o node_media.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_program.o node_program.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_quad.o node_quad.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_render.o node_render.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_resourceprops.o node_resourceprops.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_rotate.o node_rotate.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_rotatequat.o node_rotatequat.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_rtt.o node_rtt.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_scale.o node_scale.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_streamed.o node_streamed.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_streamedbuffer.o node_streamedbuffer.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_text.o node_text.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_texture.o node_texture.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_time.o node_time.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_timerangefilter.o node_timerangefilter.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_timerangemodes.o node_timerangemodes.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_transform.o node_transform.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_translate.o node_translate.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_triangle.o node_triangle.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_uniform.o node_uniform.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o node_userswitch.o node_userswitch.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o nodes.o nodes.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o params.o params.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o pass.o pass.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o pgcache.o pgcache.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o pgcraft.o pgcraft.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o pipeline.o pipeline.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o program.o program.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o rendertarget.o rendertarget.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o rnode.o rnode.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o serialize.o serialize.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o texture.o texture.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o transforms.o transforms.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o utils.o utils.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o buffer_gl.o buffer_gl.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o format_gl.o format_gl.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o gctx_gl.o gctx_gl.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o glcontext.o glcontext.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o glstate.o glstate.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o gtimer_gl.o gtimer_gl.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o pipeline_gl.o pipeline_gl.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o program_gl.o program_gl.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o rendertarget_gl.o rendertarget_gl.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o texture_gl.o texture_gl.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o topology_gl.o topology_gl.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o type_gl.o type_gl.c
+Package shaderc was not found in the pkg-config search path.
+Perhaps you should add the directory containing `shaderc.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'shaderc' found
+cc  -Wall -O2 -Werror=missing-prototypes -std=c99 -DTARGET_MINGW_W64 -DARCH_X86_64 -fPIC -DBACKEND_GL -DBACKEND_VK -DHAVE_GLPLATFORM_WGL -I/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/nodegl-env/include  -MMD -MP  -c -o buffer_vk.o buffer_vk.c
+In file included from buffer_vk.c:25:
+buffer_vk.h:25:10: fatal error: vulkan/vulkan.h: No such file or directory
+   25 | #include <vulkan/vulkan.h>
+      |          ^~~~~~~~~~~~~~~~~
+compilation terminated.
+make[1]: *** [<builtin>: buffer_vk.o] Error 1
+make[1]: Leaving directory '/c/Users/jmoguillansky/Documents/2020/Git/gopro-lib-node.gl/libnodegl'
+make: *** [Makefile:71: nodegl-install] Error 2
