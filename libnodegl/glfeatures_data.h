@@ -22,11 +22,12 @@
 /* WARNING: this file must only be included once */
 
 #include "glcontext.h"
+#include <stdint.h>
 
 #define OFFSET(x) offsetof(struct glfunctions, x)
 static const struct glfeature {
     const char *name;
-    int flag;
+    int64_t flag;
     size_t offset;
     int version;
     int es_version;
@@ -259,5 +260,12 @@ static const struct glfeature {
         .funcs_offsets  = (const size_t[]){OFFSET(MapBufferRange),
                                            OFFSET(UnmapBuffer),
                                            -1}
+    }, {
+    .name           = "gl_khr_debug",
+    .flag           = NGLI_FEATURE_GL_KHR_DEBUG,
+    .version        = 430,
+    .es_version     = 300,
+    .funcs_offsets  = (const size_t[]){OFFSET(DebugMessageCallback),
+                                       -1}
     }
 };
