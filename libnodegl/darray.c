@@ -24,6 +24,7 @@
 #include "nodegl.h"
 #include "darray.h"
 #include "memory.h"
+#include "log.h"
 #include "utils.h"
 
 static int reserve_non_aligned(struct darray *darray, int capacity)
@@ -107,6 +108,15 @@ void *ngli_darray_get(const struct darray *darray, int index)
         return NULL;
     return darray->data + index * darray->element_size;
 }
+
+int ngli_darray_set(const struct darray *darray, int index, const void* element)
+{
+    void* dst = ngli_darray_get(darray, index);
+    if (!dst) return NGL_ERROR_ACCESS;
+    memcpy(dst, element, darray->element_size);
+    return 0;
+}
+
 
 void ngli_darray_reset(struct darray *darray)
 {
