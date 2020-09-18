@@ -28,9 +28,15 @@ struct pipeline *ngli_pipeline_create(struct gctx *gctx)
     return gctx->class->pipeline_create(gctx);
 }
 
-int ngli_pipeline_init(struct pipeline *s, const struct pipeline_params *params)
+int ngli_pipeline_init(struct pipeline *s, const struct pipeline_desc_params *params)
 {
     return s->gctx->class->pipeline_init(s, params);
+}
+
+int ngli_pipeline_bind_resources(struct pipeline *s, const struct pipeline_desc_params *desc_params,
+                                 const struct pipeline_resource_params *data_params)
+{
+    return s->gctx->class->pipeline_bind_resources(s, desc_params, data_params);
 }
 
 int ngli_pipeline_update_attribute(struct pipeline *s, int index, struct buffer *buffer)

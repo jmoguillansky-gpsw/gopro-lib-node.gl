@@ -44,123 +44,6 @@
 #include "util_vk.h"
 #include <limits.h>
 
-static VkSurfaceFormatKHR select_swapchain_surface_format(const VkSurfaceFormatKHR *formats,
-                                                          uint32_t nb_formats)
-{
-    VkSurfaceFormatKHR target_fmt = {
-        .format = VK_FORMAT_B8G8R8A8_UNORM,
-        .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
-    };
-    if (nb_formats == 1 && formats[0].format == VK_FORMAT_UNDEFINED)
-        return target_fmt;
-    for (uint32_t i = 0; i < nb_formats; i++)
-        if (formats[i].format == target_fmt.format &&
-            formats[i].colorSpace == target_fmt.colorSpace)
-            return formats[i];
-    return formats[0];
-}
-
-static VkPresentModeKHR select_swapchain_present_mode(const VkPresentModeKHR *present_modes,
-                                                      uint32_t nb_present_modes)
-{
-    VkPresentModeKHR target_mode = VK_PRESENT_MODE_FIFO_KHR;
-
-    for (uint32_t i = 0; i < nb_present_modes; i++) {
-
-        /* triple buffering, best mode possible */
-        if (present_modes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
-            return present_modes[i];
-
-        /* some drivers may not actually have VK_PRESENT_MODE_FIFO_KHR */
-        if (present_modes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
-            target_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-    }
-    return target_mode;
-}
-
-static uint32_t clip_u32(uint32_t x, uint32_t min, uint32_t max)
-{
-    if (x < min)
-        return min;
-    if (x > max)
-        return max;
-    return x;
-}
-
-static VkExtent2D select_swapchain_current_extent(struct gctx *s,
-                                                  VkSurfaceCapabilitiesKHR caps)
-{
-    struct gctx_vk *s_priv = (struct gctx_vk *)s;
-    // XXX: we want to rely on value passed by the user (set to vk->width, vk->height in vk_resize()
-    // so the viewport and scissor matches the extent
-#if 0
-    if (caps.currentExtent.width != UINT32_MAX) {
-        LOG(DEBUG, "current extent: %dx%d", caps.currentExtent.width, caps.currentExtent.height);
-        return caps.currentExtent;
-    }
-#endif
-
-    VkExtent2D ext = {
-        .width  = clip_u32(s_priv->width,  caps.minImageExtent.width,  caps.maxImageExtent.width),
-        .height = clip_u32(s_priv->height, caps.minImageExtent.height, caps.maxImageExtent.height),
-    };
-    LOG(DEBUG, "swapchain extent %dx%d", ext.width, ext.height);
-    return ext;
-}
-
-static VkResult create_swapchain(struct gctx *s)
-{
-    struct gctx_vk *s_priv = (struct gctx_vk *)s;
-    struct vkcontext *vk = s_priv->vkcontext;
-
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk->phy_device, vk->surface, &s_priv->surface_caps);
-
-    s_priv->surface_format = select_swapchain_surface_format(vk->surface_formats, vk->nb_surface_formats);
-    s_priv->present_mode = select_swapchain_present_mode(vk->present_modes, vk->nb_present_modes);
-    s_priv->extent = select_swapchain_current_extent(s, s_priv->surface_caps);
-    s_priv->width = s_priv->extent.width;
-    s_priv->height = s_priv->extent.height;
-    LOG(INFO, "current extent: %dx%d", s_priv->extent.width, s_priv->extent.height);
-
-    uint32_t img_count = s_priv->surface_caps.minImageCount + 1;
-    if (s_priv->surface_caps.maxImageCount && img_count > s_priv->surface_caps.maxImageCount)
-        img_count = s_priv->surface_caps.maxImageCount;
-    LOG(INFO, "swapchain image count: %d [%d-%d]", img_count,
-           s_priv->surface_caps.minImageCount, s_priv->surface_caps.maxImageCount);
-
-    VkSwapchainCreateInfoKHR swapchain_create_info = {
-        .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-        .surface = vk->surface,
-        .minImageCount = img_count,
-        .imageFormat = s_priv->surface_format.format,
-        .imageColorSpace = s_priv->surface_format.colorSpace,
-        .imageExtent = s_priv->extent,
-        .imageArrayLayers = 1,
-        .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .preTransform = s_priv->surface_caps.currentTransform,
-        .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-        .presentMode = s_priv->present_mode,
-        .clipped = VK_TRUE,
-    };
-
-    const uint32_t queue_family_indices[2] = {
-        vk->graphics_queue_index,
-        vk->present_queue_index,
-    };
-    if (queue_family_indices[0] != queue_family_indices[1]) {
-        swapchain_create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-        swapchain_create_info.queueFamilyIndexCount = NGLI_ARRAY_NB(queue_family_indices);
-        swapchain_create_info.pQueueFamilyIndices = queue_family_indices;
-    }
-
-    VkResult res = vkCreateSwapchainKHR(vk->device, &swapchain_create_info, NULL, &s_priv->swapchain);
-    if (res != VK_SUCCESS)
-        return res;
-
-    return res;
-}
-
 int ngli_gctx_vk_begin_transient_command(struct gctx *s, VkCommandBuffer *command_buffer)
 {
     struct gctx_vk *s_priv = (struct gctx_vk *)s;
@@ -1190,6 +1073,7 @@ const struct gctx_class ngli_gctx_vk = {
 
     .pipeline_create         = ngli_pipeline_vk_create,
     .pipeline_init           = ngli_pipeline_vk_init,
+    .pipeline_bind_resources = ngli_pipeline_vk_bind_resources,
     .pipeline_update_attribute = ngli_pipeline_vk_update_attribute,
     .pipeline_update_uniform = ngli_pipeline_vk_update_uniform,
     .pipeline_update_texture = ngli_pipeline_vk_update_texture,

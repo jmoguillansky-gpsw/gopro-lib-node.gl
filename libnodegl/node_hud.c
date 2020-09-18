@@ -1329,7 +1329,7 @@ static int hud_init(struct ngl_node *node)
     graphicstate.blend_src_factor_a = NGLI_BLEND_FACTOR_ZERO;
     graphicstate.blend_dst_factor_a = NGLI_BLEND_FACTOR_ONE;
 
-    struct pipeline_params pipeline_params = {
+    struct pipeline_desc_params pipeline_desc_params = {
         .type          = NGLI_PIPELINE_TYPE_GRAPHICS,
         .graphics      = {
             .topology    = NGLI_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
@@ -1355,7 +1355,9 @@ static int hud_init(struct ngl_node *node)
     if (!s->crafter)
         return NGL_ERROR_MEMORY;
 
-    ret = ngli_pgcraft_craft(s->crafter, &pipeline_params, &crafter_params);
+    struct pipeline_resource_params pipeline_resource_params;
+    ret = ngli_pgcraft_craft(s->crafter, &pipeline_desc_params, &pipeline_resource_params, &crafter_params);
+
     if (ret < 0)
         return ret;
 
@@ -1363,7 +1365,11 @@ static int hud_init(struct ngl_node *node)
     if (!s->pipeline)
         return NGL_ERROR_MEMORY;
 
-    ret = ngli_pipeline_init(s->pipeline, &pipeline_params);
+    ret = ngli_pipeline_init(s->pipeline, &pipeline_desc_params);
+    if (ret < 0)
+        return ret;
+
+    ret = ngli_pipeline_bind_resources(s->pipeline, &pipeline_desc_params, &pipeline_resource_params);
     if (ret < 0)
         return ret;
 

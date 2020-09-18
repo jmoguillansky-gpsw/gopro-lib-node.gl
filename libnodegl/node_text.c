@@ -471,7 +471,7 @@ static int text_init(struct ngl_node *node)
 
 static int init_subdesc(struct ngl_node *node,
                         struct pipeline_subdesc *desc,
-                        struct pipeline_params *pipeline_params,
+                        struct pipeline_desc_params *pipeline_desc_params,
                         const struct pgcraft_params *crafter_params)
 {
     struct ngl_ctx *ctx = node->ctx;
@@ -481,7 +481,8 @@ static int init_subdesc(struct ngl_node *node,
     if (!desc->crafter)
         return NGL_ERROR_MEMORY;
 
-    int ret = ngli_pgcraft_craft(desc->crafter, pipeline_params, crafter_params);
+    struct pipeline_resource_params pipeline_resource_params;
+    int ret = ngli_pgcraft_craft(desc->crafter, pipeline_desc_params, &pipeline_resource_params, crafter_params);
     if (ret < 0)
         return ret;
 
@@ -489,7 +490,11 @@ static int init_subdesc(struct ngl_node *node,
     if (!desc->pipeline)
         return NGL_ERROR_MEMORY;
 
-    ret = ngli_pipeline_init(desc->pipeline, pipeline_params);
+    ret = ngli_pipeline_init(desc->pipeline, pipeline_desc_params);
+    if (ret < 0)
+        return ret;
+
+    ret = ngli_pipeline_bind_resources(desc->pipeline, pipeline_desc_params, &pipeline_resource_params);
     if (ret < 0)
         return ret;
 
@@ -522,7 +527,7 @@ static int bg_prepare(struct ngl_node *node, struct pipeline_subdesc *desc)
         },
     };
 
-    struct pipeline_params pipeline_params = {
+    struct pipeline_desc_params pipeline_desc_params = {
         .type          = NGLI_PIPELINE_TYPE_GRAPHICS,
         .graphics      = {
             .topology       = NGLI_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -540,7 +545,7 @@ static int bg_prepare(struct ngl_node *node, struct pipeline_subdesc *desc)
         .nb_attributes    = NGLI_ARRAY_NB(attributes),
     };
 
-    return init_subdesc(node, desc, &pipeline_params, &crafter_params);
+    return init_subdesc(node, desc, &pipeline_desc_params, &crafter_params);
 }
 
 static int fg_prepare(struct ngl_node *node, struct pipeline_subdesc *desc)
@@ -589,7 +594,7 @@ static int fg_prepare(struct ngl_node *node, struct pipeline_subdesc *desc)
     state.blend_src_factor_a = NGLI_BLEND_FACTOR_SRC_ALPHA;
     state.blend_dst_factor_a = NGLI_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 
-    struct pipeline_params pipeline_params = {
+    struct pipeline_desc_params pipeline_desc_params = {
         .type          = NGLI_PIPELINE_TYPE_GRAPHICS,
         .graphics      = {
             .topology       = NGLI_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -611,12 +616,12 @@ static int fg_prepare(struct ngl_node *node, struct pipeline_subdesc *desc)
         .nb_vert_out_vars = NGLI_ARRAY_NB(vert_out_vars),
     };
 
-    int ret = init_subdesc(node, desc, &pipeline_params, &crafter_params);
+    int ret = init_subdesc(node, desc, &pipeline_desc_params, &crafter_params);
     if (ret < 0)
         return ret;
 
-    ngli_assert(!strcmp("position", pipeline_params.attributes[0].name));
-    ngli_assert(!strcmp("uvcoord", pipeline_params.attributes[1].name));
+    ngli_assert(!strcmp("position", pipeline_desc_params.attributes_desc[0].name));
+    ngli_assert(!strcmp("uvcoord", pipeline_desc_params.attributes_desc[1].name));
 
     return 0;
 }

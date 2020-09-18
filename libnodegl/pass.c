@@ -66,7 +66,6 @@ static int register_uniform(struct pass *s, const char *name, struct ngl_node *u
 
     struct pgcraft_uniform crafter_uniform = {.stage = stage};
     snprintf(crafter_uniform.name, sizeof(crafter_uniform.name), "%s", name);
-
     if (uniform->class->category == NGLI_NODE_CATEGORY_BUFFER) {
         struct buffer_priv *buffer_priv = uniform->priv_data;
         crafter_uniform.type  = buffer_priv->data_type;
@@ -459,7 +458,7 @@ int ngli_pass_prepare(struct pass *s)
     pipeline_graphics.state = rnode->graphicstate;
     pipeline_graphics.rt_desc = rnode->rendertarget_desc;
 
-    struct pipeline_params pipeline_params = {
+    struct pipeline_desc_params pipeline_desc_params = {
         .type          = s->pipeline_type,
         .graphics      = pipeline_graphics,
     };
@@ -492,7 +491,8 @@ int ngli_pass_prepare(struct pass *s)
     if (!desc->crafter)
         return NGL_ERROR_MEMORY;
 
-    int ret = ngli_pgcraft_craft(desc->crafter, &pipeline_params, &crafter_params);
+    struct pipeline_resource_params pipeline_resource_params;
+    int ret = ngli_pgcraft_craft(desc->crafter, &pipeline_desc_params, &pipeline_resource_params, &crafter_params);
     if (ret < 0)
         return ret;
 
@@ -500,7 +500,11 @@ int ngli_pass_prepare(struct pass *s)
     if (!desc->pipeline)
         return NGL_ERROR_MEMORY;
 
-    ret = ngli_pipeline_init(desc->pipeline, &pipeline_params);
+    ret = ngli_pipeline_init(desc->pipeline, &pipeline_desc_params);
+    if (ret < 0)
+        return ret;
+
+    ret = ngli_pipeline_bind_resources(desc->pipeline, &pipeline_desc_params, &pipeline_resource_params);
     if (ret < 0)
         return ret;
 

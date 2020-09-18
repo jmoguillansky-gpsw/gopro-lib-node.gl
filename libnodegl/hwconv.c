@@ -125,7 +125,7 @@ int ngli_hwconv_init(struct hwconv *hwconv, struct ngl_ctx *ctx,
         },
     };
 
-    struct pipeline_params pipeline_params = {
+    struct pipeline_desc_params pipeline_desc_params = {
         .type          = NGLI_PIPELINE_TYPE_GRAPHICS,
         .graphics      = {
             .topology    = NGLI_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
@@ -149,7 +149,8 @@ int ngli_hwconv_init(struct hwconv *hwconv, struct ngl_ctx *ctx,
     if (!hwconv->crafter)
         return NGL_ERROR_MEMORY;
 
-    ret = ngli_pgcraft_craft(hwconv->crafter, &pipeline_params, &crafter_params);
+    struct pipeline_resource_params pipeline_resource_params;
+    ret = ngli_pgcraft_craft(hwconv->crafter, &pipeline_desc_params, &pipeline_resource_params, &crafter_params);
     if (ret < 0)
         return ret;
 
@@ -157,7 +158,11 @@ int ngli_hwconv_init(struct hwconv *hwconv, struct ngl_ctx *ctx,
     if (!hwconv->pipeline)
         return NGL_ERROR_MEMORY;
 
-    ret = ngli_pipeline_init(hwconv->pipeline, &pipeline_params);
+    ret = ngli_pipeline_init(hwconv->pipeline, &pipeline_desc_params);
+    if (ret < 0)
+        return ret;
+
+    ret = ngli_pipeline_bind_resources(hwconv->pipeline, &pipeline_desc_params, &pipeline_resource_params);
     if (ret < 0)
         return ret;
 
