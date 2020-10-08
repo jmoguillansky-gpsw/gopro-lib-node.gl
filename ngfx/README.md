@@ -74,9 +74,9 @@ The graphics platform features a layered architecture.
 
 ## How to Run  
 
-1) To run ngfx unit tests:
-  a) may need to modify run settings in IDE (may need to change working directory: typically "cmake-build-debug")
-  b) can run directly from IDE or from command line
+1) To run ngfx unit tests:  
+  a) may need to modify run settings in IDE (may need to change working directory: typically "cmake-build-debug")  
+  b) can run directly from IDE or from command line  
   
 1) To run nodegl unit tests:  
     a) cd nodegl/tests/unitTests  
