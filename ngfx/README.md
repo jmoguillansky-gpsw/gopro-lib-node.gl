@@ -37,7 +37,7 @@ The graphics platform features a layered architecture.
 		on MacOS: cmake -H. -Bcmake-build-debug -G Xcode -DGRAPHICS_BACKEND_METAL=ON (or -DGRAPHICS_BACKEND_VULKAN=ON)  
 	
 	For release build:  
-	cmake -H. -Bcmake-build-release -DCMAKE_BUILD_TYPE=Release -DGRAPHICS_BACKEND_<option>=ON (where option is VULKAN, METAL, or DIRECTX12)
+	cmake -H. -Bcmake-build-release -DCMAKE_BUILD_TYPE=Release -DGRAPHICS_BACKEND_[option]=ON (where option is VULKAN, METAL, or DIRECTX12)
 	
 6)  Build project
 
