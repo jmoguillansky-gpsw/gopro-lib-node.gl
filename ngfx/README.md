@@ -35,8 +35,8 @@ The graphics platform features a layered architecture.
 		see https://vulkan.lunarg.com/doc/view/1.1.106.0/linux/getting_started.html  
 		
 4) Compile shaders:  
-	python3 scripts/compile_shaders_<backend>.py
-	To enable verbose output: V=1 python3 scripts/compile_shaders_[backend].py
+	python3 scripts/compile_shaders_[backend].py  
+	To enable verbose output: V=1 python3 scripts/compile_shaders_[backend].py  
 	 
 5) Run CMake to generate makefiles  
 	From top-level directory run the helper script: bash scripts/run_cmake_[option].sh  
