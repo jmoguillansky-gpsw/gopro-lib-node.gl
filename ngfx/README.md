@@ -64,6 +64,14 @@ The graphics platform features a layered architecture.
 7) Copy resource files to build folder  
 	bash scripts/copy_data.sh  
 
+8) To setup node.gl environment:  
+    8.1) Install cython: python3 -m pip install cython  
+    8.2) build pynodegl-utils:  
+    	cd nodegl/pynodegl-utils && bash build_[option].sh  
+    8.3) build pynodegl:  
+        cd nodegl/pynodegl && bash build_[option].sh
+        
+
 ## Programming Guide
 See: https://github.com/gopro/personal--graphics-engine/blob/master/doc/NodeGFX%20Programming%20Guide.docx?raw=true
 
