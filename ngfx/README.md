@@ -48,6 +48,7 @@ The graphics platform features a layered architecture.
 	For release build:  
 	cmake -H. -Bcmake-build-release -DCMAKE_BUILD_TYPE=Release -DGRAPHICS_BACKEND_[option]=ON (where option is VULKAN, METAL, or DIRECTX12)
 	
+	Note: may need to modify cmakefiles: update include paths / lib paths (TODO: fix)  
 6)  Build project
 
 	Using IDE  
@@ -69,8 +70,13 @@ The graphics platform features a layered architecture.
     8.2) build pynodegl-utils:  
     	cd nodegl/pynodegl-utils && bash build_[option].sh  
     8.3) build pynodegl:  
-        cd nodegl/pynodegl && bash build_[option].sh
-        
+        cd nodegl/pynodegl && bash build_[option].sh  
+    
+9) To run nodegl unit tests:  
+    9.1) cd nodegl/tests/unitTests
+    9.2) set environment: source scripts/env_[option].sh  
+	Note: may need to modify the environment script, update paths, etc.  (TODO: fix)  
+    9.3) bash scripts/run_[option].sh    
 
 ## Programming Guide
 See: https://github.com/gopro/personal--graphics-engine/blob/master/doc/NodeGFX%20Programming%20Guide.docx?raw=true
