@@ -71,12 +71,18 @@ The graphics platform features a layered architecture.
     	cd nodegl/pynodegl-utils && bash build_[option].sh  
     8.3) build pynodegl:  
         cd nodegl/pynodegl && bash build_[option].sh  
-    
-9) To run nodegl unit tests:  
-    9.1) cd nodegl/tests/unitTests  
-    9.2) set environment: source scripts/env_[option].sh  
+
+## How to Run  
+
+1) To run ngfx unit tests:
+  a) may need to modify run settings in IDE (may need to change working directory: typically "cmake-build-debug")
+  b) can run directly from IDE or from command line
+  
+1) To run nodegl unit tests:  
+    a) cd nodegl/tests/unitTests  
+    b) set environment: source scripts/env_[option].sh  
 	Note: may need to modify the environment script, update paths, etc.  (TODO: fix)  
-    9.3) bash scripts/run_[option].sh  
+    c) bash scripts/run_[option].sh  
 
 ## Programming Guide  
 See: https://github.com/gopro/personal--graphics-engine/blob/master/doc/NodeGFX%20Programming%20Guide.docx?raw=true  
