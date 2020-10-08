@@ -30,7 +30,7 @@ The graphics platform features a layered architecture.
 	python3 scripts/compile_shaders_<backend>.py
 	 
 5) Run CMake to generate makefiles  
-	From top-level directory run the helper script: bash scripts/run_cmake_<option>.sh  
+	From top-level directory run the helper script: bash scripts/run_cmake_[option].sh  
 	This runs the following command:  
 		on Linux: cmake -H. -Bcmake-build-debug -DGRAPHICS_BACKEND_VULKAN=ON  
 		on Windows: cmake.exe -H. -Bcmake-build-debug -G "Visual Studio 16 2019" -A x64 -DGRAPHICS_BACKEND_DIRECTX12=ON (or -DGRAPHICS_BACKEND_VULKAN=ON)  
