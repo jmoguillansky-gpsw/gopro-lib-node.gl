@@ -23,14 +23,14 @@ link_directories (/usr/local/lib)
 add_library(NodeGL ${NODEGL_BUILD_TYPE} ${NGL_ADAPTER_SOURCE_FILES})
 target_compile_definitions(NodeGL PUBLIC ${GRAPHICS_BACKEND_CFLAGS})
 target_compile_options(NodeGL PUBLIC -std=c++17)
-target_link_libraries(NodeGL PUBLIC ngfx ${GRAPHICS_BACKEND_LIBS} ${SXPLAYER_LIBS})
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-target_link_libraries(NodeGL PUBLIC
+set (SXPLAYER_LIBS ${SXPLAYER_LIBS}
     "-framework CoreMedia"
     "-framework CoreVideo"
     "-framework VideoToolbox"
 )
 endif()
+target_link_libraries(NodeGL PUBLIC ngfx ${GRAPHICS_BACKEND_LIBS} ${SXPLAYER_LIBS})
 link_directories(${PYTHON_LIB_PATH})
 
 build_test(nglViewer)
