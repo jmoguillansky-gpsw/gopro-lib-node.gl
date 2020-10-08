@@ -29,15 +29,15 @@ The graphics platform features a layered architecture.
 4) Compile shaders:  
 	python3 scripts/compile_shaders_<backend>.py
 	 
-5) Run CMake to generate makefiles
-	From top-level directory run the helper script: bash scripts/run_cmake_<option>.sh
-	This runs the following command:
-		on Linux: cmake -H. -Bcmake-build-debug -DGRAPHICS_BACKEND_VULKAN=ON
-		on Windows: cmake.exe -H. -Bcmake-build-debug -G "Visual Studio 16 2019" -A x64 -DGRAPHICS_BACKEND_DIRECTX12=ON (or -DGRAPHICS_BACKEND_VULKAN=ON)
-		on MacOS: cmake -H. -Bcmake-build-debug -G Xcode -DGRAPHICS_BACKEND_METAL=ON (or -DGRAPHICS_BACKEND_VULKAN=ON)
+5) Run CMake to generate makefiles  
+	From top-level directory run the helper script: bash scripts/run_cmake_<option>.sh  
+	This runs the following command:  
+		on Linux: cmake -H. -Bcmake-build-debug -DGRAPHICS_BACKEND_VULKAN=ON  
+		on Windows: cmake.exe -H. -Bcmake-build-debug -G "Visual Studio 16 2019" -A x64 -DGRAPHICS_BACKEND_DIRECTX12=ON (or -DGRAPHICS_BACKEND_VULKAN=ON)  
+		on MacOS: cmake -H. -Bcmake-build-debug -G Xcode -DGRAPHICS_BACKEND_METAL=ON (or -DGRAPHICS_BACKEND_VULKAN=ON)  
 	
 	For release build:  
-	cmake -H. -Bcmake-build-release -DCMAKE_BUILD_TYPE=Release  
+	cmake -H. -Bcmake-build-release -DCMAKE_BUILD_TYPE=Release -DGRAPHICS_BACKEND_<option>=ON (where option is VULKAN, METAL, or DIRECTX12)
 	
 6)  Build project
 
