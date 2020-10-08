@@ -1,26 +1,26 @@
-# NGFX Graphics Abstraction API
+# NGFX Graphics Abstraction API  
 NGFX is a low-level graphics abstraction API on top of Vulkan, DirectX12, and Metal.  
-It exposes the benefits of next-generation graphics technology via a common
-platform abstraction API.  It also supports optional access to the backend data structures,
-enabling platform specific optimizations.
+It exposes the benefits of next-generation graphics technology via a common  
+platform abstraction API.  It also supports optional access to the backend data structures,  
+enabling platform specific optimizations.  
 
-## Architecture
+## Architecture  
 
 The graphics platform features a layered architecture.  
-<img src="doc/NodeGFX-High Level Architecture.svg">
+<img src="doc/NodeGFX-High Level Architecture.svg">  
 
-## Build Instructions
+## Build Instructions  
 
-1) Install Dependencies  
+1) Install Dependencies    
    On Vulkan Platform (primarily for Linux): Install Vulkan SDK  
-   On Windows: Install DirectX 12 SDK
-   Install glew, glfw, stb_image
-   On Linux: use apt for debian-based systems, or pacman for arch-linux based systems
-   	for debian based: apt-get install glew glfw (etc.)
-	for archlinux based: pacman -S glew glfw (etc.)
-   On MacOS: use brew package manager
+   On Windows: Install DirectX 12 SDK  
+   Install glew, glfw, stb_image  
+   On Linux: use apt for debian-based systems, or pacman for arch-linux based systems  
+   	for debian based: apt-get install glew glfw (etc.)  
+	for archlinux based: pacman -S glew glfw (etc.)  
+   On MacOS: use brew package manager  
    
-   For stb_image: may need to download the header manually from https://github.com/nothings/stb/blob/master/stb_image.h
+   For stb_image: may need to download the header manually from https://github.com/nothings/stb/blob/master/stb_image.h  
    
 2) set environment:  
 	For Vulkan Platform:  
@@ -29,7 +29,7 @@ The graphics platform features a layered architecture.
 	On Windows:  
 		(Optional) Install Windows Subsystem for Linux.  
 
-3) Install SDK
+3) Install SDK  
 	For Vulkan Platform:  
 		Install Vulkan SDK to system directories:  
 		see https://vulkan.lunarg.com/doc/view/1.1.106.0/linux/getting_started.html  
@@ -46,10 +46,10 @@ The graphics platform features a layered architecture.
 		on MacOS: cmake -H. -Bcmake-build-debug -G Xcode -DGRAPHICS_BACKEND_METAL=ON (or -DGRAPHICS_BACKEND_VULKAN=ON)  
 	
 	For release build:  
-	cmake -H. -Bcmake-build-release -DCMAKE_BUILD_TYPE=Release -DGRAPHICS_BACKEND_[option]=ON (where option is VULKAN, METAL, or DIRECTX12)
+	cmake -H. -Bcmake-build-release -DCMAKE_BUILD_TYPE=Release -DGRAPHICS_BACKEND_[option]=ON (where option is VULKAN, METAL, or DIRECTX12)  
 	
 	Note: may need to modify cmakefiles: update include paths / lib paths (TODO: fix)  
-6)  Build project
+6)  Build project  
 
 	Using IDE  
 	On Linux: recommend Qt Creator  
@@ -73,13 +73,13 @@ The graphics platform features a layered architecture.
         cd nodegl/pynodegl && bash build_[option].sh  
     
 9) To run nodegl unit tests:  
-    9.1) cd nodegl/tests/unitTests
+    9.1) cd nodegl/tests/unitTests  
     9.2) set environment: source scripts/env_[option].sh  
 	Note: may need to modify the environment script, update paths, etc.  (TODO: fix)  
-    9.3) bash scripts/run_[option].sh    
+    9.3) bash scripts/run_[option].sh  
 
-## Programming Guide
-See: https://github.com/gopro/personal--graphics-engine/blob/master/doc/NodeGFX%20Programming%20Guide.docx?raw=true
+## Programming Guide  
+See: https://github.com/gopro/personal--graphics-engine/blob/master/doc/NodeGFX%20Programming%20Guide.docx?raw=true  
 
 
 ## References  
