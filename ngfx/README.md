@@ -36,6 +36,7 @@ The graphics platform features a layered architecture.
 		
 4) Compile shaders:  
 	python3 scripts/compile_shaders_<backend>.py
+	To enable verbose output: V=1 python3 scripts/compile_shaders_[backend].py
 	 
 5) Run CMake to generate makefiles  
 	From top-level directory run the helper script: bash scripts/run_cmake_[option].sh  
