@@ -11,8 +11,16 @@ The graphics platform features a layered architecture.
 
 ## Build Instructions
 
-1) On Vulkan Platform (primarily for Linux): Install Vulkan SDK  
-   On Windows: Install DirectX 12 SDK  
+1) Install Dependencies  
+   On Vulkan Platform (primarily for Linux): Install Vulkan SDK  
+   On Windows: Install DirectX 12 SDK
+   Install glew, glfw, stb_image
+   On Linux: use apt for debian-based systems, or pacman for arch-linux based systems
+   	for debian based: apt-get install glew glfw (etc.)
+	for archlinux based: pacman -S glew glfw (etc.)
+   On MacOS: use brew package manager
+   
+   For stb_image: may need to download the header manually from https://github.com/nothings/stb/blob/master/stb_image.h
    
 2) set environment:  
 	For Vulkan Platform:  
