@@ -86,7 +86,7 @@ a) "ImportError: dlopen(..., 2): Library not loaded: ...  "
   
   As a temporary workaround we disabled "system integrity protection" , see: https://www.macworld.co.uk/how-to/mac/how-turn-off-mac-os-x-system-integrity-protection-rootless-3638975/  
   
-  TODO: find a correct solution...  
+  TODO: find a better solution.  Using python virtual environment should resolve this issue.  
 
 ## How to Run  
 
