@@ -72,6 +72,22 @@ The graphics platform features a layered architecture.
     8.3) build pynodegl:  
         cd nodegl/pynodegl && bash build_[option].sh  
 
+## Troubleshooting
+
+1) MacOS  
+
+a) "ImportError: dlopen(..., 2): Library not loaded: ...  "
+  "...."
+  "Reason: image not found  "
+ 
+  We currently set the shared library search path using "DYLD_FALLBACK_LIBRARY_PATH" environment variable (see env_macos.sh).  
+  
+  However this trick seems no longer supported due to "system integrity protection": https://support.apple.com/en-us/HT204899  
+  
+  As a temporary workaround we disabled "system integrity protection" , see: https://www.macworld.co.uk/how-to/mac/how-turn-off-mac-os-x-system-integrity-protection-rootless-3638975/  
+  
+  TODO: find a correct solution...  
+
 ## How to Run  
 
 1) To run ngfx unit tests:  
