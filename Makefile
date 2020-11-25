@@ -63,6 +63,7 @@ RPATH_LDFLAGS ?= -Wl,-rpath,$(PREFIX)/lib
 
 ifeq ($(TARGET_OS),Windows)
 MESON_SETUP   = meson setup --backend vs --prefix="$(W_PREFIX)" --pkg-config-path=$(PREFIX)\\Lib\\pkgconfig -Drpath=true
+MESON_SETUP_NINJA   = meson setup --backend ninja --prefix="$(W_PREFIX)" --pkg-config-path=$(PREFIX)\\Lib\\pkgconfig -Drpath=true
 else
 MESON_SETUP   = meson setup --prefix=$(PREFIX) --pkg-config-path=$(PREFIX)/lib/pkgconfig -Drpath=true
 endif
@@ -164,9 +165,12 @@ endif
 pynodegl-install: pynodegl-deps-install
 ifeq ($(TARGET_OS),Windows)
 	(PKG_CONFIG_PATH="$(W_PREFIX)\Lib\pkgconfig" WSLENV=PKG_CONFIG_PATH/w cmd.exe /C $(ACTIVATE) \&\& pip -v install -e .\\pynodegl)
-	#Copy DLLs to runtime search path
+	#Copy DLLs and EXEs to runtime search path.  TODO: optimize
+	(cp external/win64/ffmpeg_x64-windows/bin/*.exe $(PREFIX)/Scripts/.)
 	(cp external/win64/ffmpeg_x64-windows/bin/*.dll pynodegl/.)
-	(cp external/win64/pthreads_x64-windows/bin/*.dll pynodegl/.)
+	(cp external/win64/pthreads_x64-windows/dll/x64/*.dll pynodegl/.)
+	(cp external/win64/ffmpeg_x64-windows/bin/*.dll $(PREFIX)/Scripts/.)
+	(cp external/win64/pthreads_x64-windows/dll/x64/*.dll $(PREFIX)/Scripts/.)
 else
 	(. $(ACTIVATE) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig LDFLAGS=$(RPATH_LDFLAGS) pip -v install -e ./pynodegl)
 endif
@@ -233,7 +237,7 @@ endif
 
 tests-setup: ngl-tools-install pynodegl-utils-install
 ifeq ($(TARGET_OS),Windows)
-	(cmd.exe /C $(ACTIVATE) \&\& $(MESON_SETUP) builddir\\tests tests)
+	(cmd.exe /C $(ACTIVATE) \&\& $(MESON_SETUP_NINJA) builddir\\tests tests)
 else
 	(. $(ACTIVATE) && $(MESON_SETUP) builddir/tests tests)
 endif
