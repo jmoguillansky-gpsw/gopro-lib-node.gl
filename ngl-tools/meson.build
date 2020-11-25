@@ -120,6 +120,8 @@ tools_specs = {
 }
 
 if host_system == 'windows'
+  #Python -m venv on windows creates a Scripts folder instead of a bin folder
+  #TODO: add a bin folder and add it to path in activate script
   tool_install_dir = 'Scripts'
 else
   tool_install_dir = 'bin'
