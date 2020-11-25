@@ -225,13 +225,25 @@ else
 endif
 
 tests: nodegl-tests tests-setup
+ifeq ($(TARGET_OS),Windows)
+	(cmd.exe /C $(ACTIVATE) \&\& meson test $(MESON_TESTS_SUITE_OPTS) -C builddir\\tests)
+else
 	(. $(ACTIVATE) && meson test $(MESON_TESTS_SUITE_OPTS) -C builddir/tests)
+endif
 
 tests-setup: ngl-tools-install pynodegl-utils-install
+ifeq ($(TARGET_OS),Windows)
+	(cmd.exe /C $(ACTIVATE) \&\& $(MESON_SETUP) builddir\\tests tests)
+else
 	(. $(ACTIVATE) && $(MESON_SETUP) builddir/tests tests)
+endif
 
 nodegl-tests: nodegl-install
+ifeq ($(TARGET_OS),Windows)
+	(cmd.exe /C $(ACTIVATE) \&\& meson test -C builddir\\libnodegl)
+else
 	(. $(ACTIVATE) && meson test -C builddir/libnodegl)
+endif
 
 nodegl-%: nodegl-setup
 	(. $(ACTIVATE) && $(MESON_COMPILE) -C builddir/libnodegl $(subst nodegl-,,$@))
