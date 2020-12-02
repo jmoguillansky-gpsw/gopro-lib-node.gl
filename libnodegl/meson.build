@@ -373,14 +373,6 @@ lib_link_args += cc.get_supported_link_arguments([
   '-Wl,-exported_symbols_list,@0@'.format(meson.current_source_dir() / 'libnodegl.darwin.symexport'),  # Darwin
 ])
 
-lib_name_prefix = []
-lib_name_suffix = []
-if host_system == 'windows'
-  # Follow Windows library convention
-  lib_name_prefix = ''
-  lib_name_suffix = 'lib'
-endif
-
 libnodegl = library(
   'nodegl',
   lib_src,
@@ -390,8 +382,6 @@ libnodegl = library(
   version: meson.project_version(),
   link_args: lib_link_args,
   include_directories: lib_include_dirs,
-  name_prefix: lib_name_prefix,
-  name_suffix: lib_name_suffix
 )
 lib_header = configure_file(
   input: files('nodegl.h.in'),
