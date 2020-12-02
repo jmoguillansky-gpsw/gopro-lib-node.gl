@@ -170,9 +170,11 @@ ifeq ($(TARGET_OS),Windows)
 	(cp external/win64/ffmpeg_x64-windows/bin/*.dll pynodegl/.)
 	(cp external/win64/pthreads_x64-windows/dll/x64/*.dll pynodegl/.)
 	(cp builddir/sxplayer/*.dll pynodegl/.)
+	(cp builddir/libnodegl/*.dll pynodegl/.)
 	(cp external/win64/ffmpeg_x64-windows/bin/*.dll $(PREFIX)/Scripts/.)
 	(cp external/win64/pthreads_x64-windows/dll/x64/*.dll $(PREFIX)/Scripts/.)
 	(cp builddir/sxplayer/*.dll $(PREFIX)/Scripts/.)
+	(cp builddir/libnodegl/*.dll $(PREFIX)/Scripts/.)
 else
 	(. $(ACTIVATE) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig LDFLAGS=$(RPATH_LDFLAGS) pip -v install -e ./pynodegl)
 endif
@@ -195,7 +197,7 @@ endif
 
 nodegl-setup: sxplayer-install
 ifeq ($(TARGET_OS),Windows)
-	(cmd.exe /C $(ACTIVATE) \&\& $(MESON_SETUP) $(NODEGL_DEBUG_OPTS) --default-library static libnodegl builddir\\libnodegl)
+	(cmd.exe /C $(ACTIVATE) \&\& $(MESON_SETUP) $(NODEGL_DEBUG_OPTS) --default-library shared libnodegl builddir\\libnodegl)
 else
 	(. $(ACTIVATE) && $(MESON_SETUP) $(NODEGL_DEBUG_OPTS) libnodegl builddir/libnodegl)
 endif
@@ -222,6 +224,7 @@ ifeq ($(TARGET_OS),Windows)
 	(cmd.exe /C mkdir $(PREFIX)\\Lib\\pkgconfig)
 	(cmd.exe /C pushd external\\win64\\ffmpeg_x64-windows \&\& python.exe scripts/install.py "$(W_PREFIX)" \& popd)
 	(cmd.exe /C pushd external\\win64\\pthreads_x64-windows \&\& python.exe scripts/install.py "$(W_PREFIX)" \& popd)
+	(cmd.exe /C pushd external\\win64\\sdl2_x64-windows \&\& python.exe scripts/install.py "$(W_PREFIX)" \& popd)
 	(cmd.exe /C $(ACTIVATE) \&\& pip install meson ninja)
 else ifeq ($(TARGET_OS),MinGW-w64)
 	$(PYTHON) -m venv --system-site-packages $(PREFIX)
