@@ -181,6 +181,8 @@ endif
 nodegl-install: nodegl-setup
 ifeq ($(TARGET_OS),Windows)
 	(cmd.exe /C $(ACTIVATE) \&\& $(MESON_COMPILE) -C builddir\\libnodegl \&\& $(MESON_INSTALL) -C builddir\\libnodegl)
+	# patch libnodegl.pc TODO: remove
+	sed -i -e 's/Libs.private: .*/Libs.private: OpenGL32.lib gdi32.lib/' nodegl-env/Lib/pkgconfig/libnodegl.pc
 else
 	(. $(ACTIVATE) && $(MESON_COMPILE) -C builddir/libnodegl && $(MESON_INSTALL) -C builddir/libnodegl)
 endif
