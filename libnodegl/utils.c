@@ -23,11 +23,14 @@
 #include <pthread.h>
 
 #ifdef _WIN32
+#define POW10_9 1000000000
+#include <Windows.h>
 #include <Handleapi.h>
 #include <Fileapi.h>
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <errno.h>
 #endif
@@ -37,12 +40,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef _WIN32
-#define POW10_9 1000000000
-#include <Windows.h>
-#else
-#include <sys/time.h>
-#endif
 
 #include "log.h"
 #include "memory.h"
