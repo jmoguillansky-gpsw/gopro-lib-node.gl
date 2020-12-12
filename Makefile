@@ -31,7 +31,7 @@ TARGET_OS  ?= $(shell uname -s)
 ifeq ($(TARGET_OS),Windows)
 PYTHON     ?= python.exe
 PREFIX     ?= nodegl-env
-W_PWD = $(shell wslpath -w .)
+W_PWD = $(shell wslpath -wa .)
 W_PREFIX ?= $(W_PWD)\$(PREFIX)
 $(info PYTHON: $(PYTHON))
 $(info PREFIX: $(PREFIX))
@@ -47,13 +47,19 @@ DEBUG_SCENE ?= no
 TESTS_SUITE ?=
 V           ?=
 
-ifneq ($(shell $(PYTHON) -c "import sys;print(sys.version_info.major)"),$(PYTHON_MAJOR))
-$(error "Python $(PYTHON_MAJOR) not found")
+ifeq ($(TARGET_OS), Windows)
+  ifneq ($(shell cmd.exe /C $(PYTHON) -c "import sys;print(sys.version_info.major)"),$(PYTHON_MAJOR))
+    $(error "Python $(PYTHON_MAJOR) not found")
+  endif
+else
+  ifneq ($(shell $(PYTHON) -c "import sys;print(sys.version_info.major)"),$(PYTHON_MAJOR))
+    $(error "Python $(PYTHON_MAJOR) not found")
+  endif
 endif
 
 ifeq ($(TARGET_OS), Windows)
 #TODO: identify correct path
-VCVARS64 = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+VCVARS64 ?= "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
 ACTIVATE = $(VCVARS64) \&\& $(PREFIX)\\Scripts\\activate.bat
 else
 ACTIVATE = $(PREFIX)/bin/activate
@@ -219,12 +225,12 @@ external-download:
 $(PREFIX):
 ifeq ($(TARGET_OS),Windows)
 	(cd external && bash scripts/sync.sh win64)
-	$(PYTHON) -m venv $(PREFIX)
+	(cmd.exe /C $(PYTHON) -m venv $(PREFIX))
 	(cmd.exe /C copy external\\win64\\pkg-config.exe nodegl-env\\Scripts)
 	(cmd.exe /C mkdir $(PREFIX)\\Lib\\pkgconfig)
-	(cmd.exe /C pushd external\\win64\\ffmpeg_x64-windows \&\& python.exe scripts/install.py "$(W_PREFIX)" \& popd)
-	(cmd.exe /C pushd external\\win64\\pthreads_x64-windows \&\& python.exe scripts/install.py "$(W_PREFIX)" \& popd)
-	(cmd.exe /C pushd external\\win64\\sdl2_x64-windows \&\& python.exe scripts/install.py "$(W_PREFIX)" \& popd)
+	(cmd.exe /C pushd external\\win64\\ffmpeg_x64-windows \&\& $(PYTHON) scripts/install.py "$(W_PREFIX)" \& popd)
+	(cmd.exe /C pushd external\\win64\\pthreads_x64-windows \&\& $(PYTHON) scripts/install.py "$(W_PREFIX)" \& popd)
+	(cmd.exe /C pushd external\\win64\\sdl2_x64-windows \&\& $(PYTHON) scripts/install.py "$(W_PREFIX)" \& popd)
 	(cmd.exe /C $(ACTIVATE) \&\& pip install meson ninja)
 else ifeq ($(TARGET_OS),MinGW-w64)
 	$(PYTHON) -m venv --system-site-packages $(PREFIX)
