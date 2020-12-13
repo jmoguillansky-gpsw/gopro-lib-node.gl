@@ -322,7 +322,6 @@ if host_system == 'windows' and cc.get_id() == 'msvc'
   windows_sdk_library_directories = [ windows_sdk_dir + '\\Lib\\10.0.18362.0\\um\\x64' ]
 
   cc_lib_dirs += windows_sdk_library_directories
-  lib_include_dirs += include_directories('..\\external\\win64\\gl\\include')
 
 endif
 
