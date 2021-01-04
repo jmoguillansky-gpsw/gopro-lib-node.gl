@@ -24,8 +24,11 @@
 #include <string.h>
 #include <sxplayer.h>
 
+#include "config.h"
+
 #if defined(TARGET_ANDROID)
 #include <libavcodec/mediacodec.h>
+#include "android_imagereader.h"
 #endif
 
 #include "log.h"
@@ -34,7 +37,7 @@
 
 #if defined(TARGET_ANDROID)
 #include "gctx.h"
-#include "texture_gl.h"
+#include "backends/gl/texture_gl.h"
 #endif
 
 static const struct param_choices sxplayer_log_level_choices = {
@@ -148,19 +151,19 @@ static int media_init(struct ngl_node *node)
 
 #if defined(TARGET_ANDROID)
     struct ngl_ctx *ctx = node->ctx;
+    struct android_ctx *android_ctx = &ctx->android_ctx;
     const struct ngl_config *config = &ctx->config;
     struct gctx *gctx = ctx->gctx;
 
     if (config->backend == NGL_BACKEND_OPENGLES) {
         struct texture_params params = {
-            .type = NGLI_TEXTURE_TYPE_2D,
-            .format = NGLI_FORMAT_UNDEFINED,
-            .min_filter = NGLI_FILTER_NEAREST,
-            .mag_filter = NGLI_FILTER_NEAREST,
-            .wrap_s = NGLI_WRAP_CLAMP_TO_EDGE,
-            .wrap_t = NGLI_WRAP_CLAMP_TO_EDGE,
-            .wrap_r = NGLI_WRAP_CLAMP_TO_EDGE,
-            .access = NGLI_ACCESS_READ_WRITE,
+            .type         = NGLI_TEXTURE_TYPE_2D,
+            .format       = NGLI_FORMAT_UNDEFINED,
+            .min_filter   = NGLI_FILTER_NEAREST,
+            .mag_filter   = NGLI_FILTER_NEAREST,
+            .wrap_s       = NGLI_WRAP_CLAMP_TO_EDGE,
+            .wrap_t       = NGLI_WRAP_CLAMP_TO_EDGE,
+            .wrap_r       = NGLI_WRAP_CLAMP_TO_EDGE,
             .external_oes = 1,
         };
 
@@ -172,22 +175,34 @@ static int media_init(struct ngl_node *node)
         if (ret < 0)
             return ret;
 
-        s->android_handlerthread = ngli_android_handlerthread_new();
-        if (!s->android_handlerthread)
-            return NGL_ERROR_MEMORY;
+        void *android_surface = NULL;
+        if (android_ctx->has_native_imagereader_api) {
+            s->android_imagereader = ngli_android_imagereader_create(android_ctx, 1, 1,
+                                                                     NGLI_ANDROID_IMAGE_FORMAT_YUV_420_888, 2);
+            if (!s->android_imagereader)
+                return NGL_ERROR_MEMORY;
 
-        void *handler = ngli_android_handlerthread_get_native_handler(s->android_handlerthread);
-        if (!handler)
-            return NGL_ERROR_EXTERNAL;
+            ret = ngli_android_imagereader_get_window(s->android_imagereader, &android_surface);
+            if (ret < 0)
+                return ret;
+        } else {
+            s->android_handlerthread = ngli_android_handlerthread_new();
+            if (!s->android_handlerthread)
+                return NGL_ERROR_MEMORY;
 
-        struct texture_gl *texture_gl = (struct texture_gl *)s->android_texture;
-        s->android_surface = ngli_android_surface_new(texture_gl->id, handler);
-        if (!s->android_surface)
-            return NGL_ERROR_MEMORY;
+            void *handler = ngli_android_handlerthread_get_native_handler(s->android_handlerthread);
+            if (!handler)
+                return NGL_ERROR_EXTERNAL;
 
-        void *android_surface = ngli_android_surface_get_surface(s->android_surface);
-        if (!android_surface)
-            return NGL_ERROR_EXTERNAL;
+            struct texture_gl *texture_gl = (struct texture_gl *)s->android_texture;
+            s->android_surface = ngli_android_surface_new(texture_gl->id, handler);
+            if (!s->android_surface)
+                return NGL_ERROR_MEMORY;
+
+            void *android_surface = ngli_android_surface_get_surface(s->android_surface);
+            if (!android_surface)
+                return NGL_ERROR_EXTERNAL;
+        }
 
         sxplayer_set_option(s->player, "opaque", &android_surface);
     }
@@ -196,6 +211,21 @@ static int media_init(struct ngl_node *node)
     sxplayer_set_option(s->player, "opaque", &ctx->va_display);
 #endif
 
+    return 0;
+}
+
+static int media_prepare(struct ngl_node *node)
+{
+    struct media_priv *s = node->priv_data;
+    if (s->nb_parents++) {
+        /*
+         * On Android, the frame can only be uploaded once and each subsequent
+         * upload will be a noop which results in an empty texture. This
+         * limitation prevents us from sharing the Media node.
+         */
+        LOG(ERROR, "Media nodes can not be shared, the Texture should be shared instead");
+        return NGL_ERROR_INVALID_USAGE;
+    }
     return 0;
 }
 
@@ -280,8 +310,14 @@ static void media_uninit(struct ngl_node *node)
     sxplayer_free(&s->player);
 
 #if defined(TARGET_ANDROID)
-    ngli_android_surface_free(&s->android_surface);
-    ngli_android_handlerthread_free(&s->android_handlerthread);
+    struct ngl_ctx *ctx = node->ctx;
+    struct android_ctx *android_ctx = &ctx->android_ctx;
+    if (android_ctx->has_native_imagereader_api) {
+        ngli_android_imagereader_freep(&s->android_imagereader);
+    } else {
+        ngli_android_surface_free(&s->android_surface);
+        ngli_android_handlerthread_free(&s->android_handlerthread);
+    }
     ngli_texture_freep(&s->android_texture);
 #endif
 }
@@ -290,6 +326,7 @@ const struct node_class ngli_media_class = {
     .id        = NGL_NODE_MEDIA,
     .name      = "Media",
     .init      = media_init,
+    .prepare   = media_prepare,
     .prefetch  = media_prefetch,
     .update    = media_update,
     .release   = media_release,

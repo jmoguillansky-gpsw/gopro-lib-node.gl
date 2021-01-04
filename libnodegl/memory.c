@@ -19,6 +19,8 @@
  * under the License.
  */
 
+#include "config.h"
+
 #ifndef TARGET_MINGW_W64
 #define _POSIX_C_SOURCE 200809L // posix_memalign()
 #endif
@@ -29,7 +31,7 @@
 #include "memory.h"
 #include "utils.h"
 
-#ifdef DEBUG_MEM
+#if DEBUG_MEM
 static int failure_requested(void)
 {
     static int alloc_counter;
@@ -83,7 +85,7 @@ void *ngli_malloc_aligned(size_t size)
         return NULL;
 
     void *ptr;
-#ifdef TARGET_MINGW_W64
+#ifdef TARGET_WINDOWS
     ptr = _aligned_malloc(size, NGLI_ALIGN_VAL);
 #else
     if (posix_memalign(&ptr, NGLI_ALIGN_VAL, size))
@@ -112,7 +114,7 @@ void ngli_freep(void *ptr)
 
 void ngli_free_aligned(void *ptr)
 {
-#ifdef TARGET_MINGW_W64
+#ifdef TARGET_WINDOWS
     _aligned_free(ptr);
 #else
     free(ptr);

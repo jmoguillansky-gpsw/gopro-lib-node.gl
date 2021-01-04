@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build_libs:
+  linux:
 
     runs-on: ubuntu-20.04
 
@@ -30,32 +30,27 @@ jobs:
 
     - name: Build
       run: |
-        #
-        # This -fPIE is a workaround for the following link issue:
-        #     relocation R_X86_64_32 against `.rodata.str1.8' can not be used
-        #     when making a PIE object; recompile with -fPIE
-        #
-        # To summarize the issue:
-        #
-        # - On Python side, `python3-config` is a script generated from a
-        #   template using a global CFLAGS. But at the same time, the script
-        #   uses LIBS and SYSLIBS to construct the LDFLAGS (and not LDFLAGS for
-        #   some moronic reason).
-        # - On Debian/Ubuntu side, they decided to have the following injected:
-        #   CFLAGS="-specs=/usr/share/dpkg/no-pie-compile.specs"
-        #   LDFLAGS="-specs=/usr/share/dpkg/no-pie-link.specs"
-        #   And unfortunately, the former can not go without the latter
-        #   (otherwise there is a link error).
-        #
-        # As a result, `python3-config --cflags` will return the `-specs=...`
-        # flags, but `python3-config --ldflags` will not return the
-        # complementary `-specs=...`.
-        #
-        export CFLAGS=-fPIE
         make -j$(($(nproc)+1))
-    - name: Run tests with GL backend
+    - name: Run tests
       run: |
-        DISABLE_TESTS_SAMPLES=yes DISABLE_TESTS_STD430=yes BACKEND=gl DEBUG=yes DEBUG_GL=yes make -k -j$(($(nproc)+1)) tests
-    - name: Run tests with GLES backend
+        DEBUG=yes DEBUG_GL=yes make -k -j$(($(nproc)+1)) tests
+
+  gles2:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Install dependencies
       run: |
-        DISABLE_TESTS_SAMPLES=yes DISABLE_TESTS_STD430=yes BACKEND=gles DEBUG=yes DEBUG_GL=yes make -k -j$(($(nproc)+1)) tests
+        sudo apt -y update
+        sudo apt -y install libsdl2-dev python3-venv
+        sudo apt -y install ffmpeg libavcodec-dev libavutil-dev libavformat-dev libavdevice-dev libavfilter-dev libswscale-dev libswresample-dev libpostproc-dev
+
+    - name: Build
+      run: |
+        make -j$(($(nproc)+1))
+    - name: Run tests with OpenGLES2
+      run: |
+        MESA_GLES_VERSION_OVERRIDE=2.0 DEBUG=yes DEBUG_GL=yes make -k -j$(($(nproc)+1)) tests TESTS_SUITE=opengles

@@ -77,7 +77,6 @@
     action(NGL_NODE_GEOMETRY,               ngli_geometry_class)                \
     action(NGL_NODE_GRAPHICCONFIG,          ngli_graphicconfig_class)           \
     action(NGL_NODE_GROUP,                  ngli_group_class)                   \
-    action(NGL_NODE_HUD,                    ngli_hud_class)                     \
     action(NGL_NODE_IDENTITY,               ngli_identity_class)                \
     action(NGL_NODE_IOINT,                  ngli_ioint_class)                   \
     action(NGL_NODE_IOIVEC2,                ngli_ioivec2_class)                 \
@@ -141,6 +140,7 @@
     action(NGL_NODE_STREAMEDBUFFERVEC3,     ngli_streamedbuffervec3_class)      \
     action(NGL_NODE_STREAMEDBUFFERVEC4,     ngli_streamedbuffervec4_class)      \
     action(NGL_NODE_STREAMEDBUFFERMAT4,     ngli_streamedbuffermat4_class)      \
+    action(NGL_NODE_UNIFORMBOOL,            ngli_uniformbool_class)             \
     action(NGL_NODE_UNIFORMINT,             ngli_uniformint_class)              \
     action(NGL_NODE_UNIFORMIVEC2,           ngli_uniformivec2_class)            \
     action(NGL_NODE_UNIFORMIVEC3,           ngli_uniformivec3_class)            \

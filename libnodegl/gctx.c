@@ -30,28 +30,42 @@
 extern const struct gctx_class ngli_gctx_gl;
 extern const struct gctx_class ngli_gctx_gles;
 
-static const struct gctx_class *backend_map[] = {
+static const struct {
+    const char *string_id;
+    const struct gctx_class *cls;
+} backend_map[] = {
+    [NGL_BACKEND_OPENGL] = {
+        .string_id = "opengl",
 #ifdef BACKEND_GL
-    [NGL_BACKEND_OPENGL]   = &ngli_gctx_gl,
-    [NGL_BACKEND_OPENGLES] = &ngli_gctx_gles,
+        .cls = &ngli_gctx_gl,
 #endif
+    },
+    [NGL_BACKEND_OPENGLES] = {
+        .string_id = "opengles",
+#ifdef BACKEND_GL
+        .cls = &ngli_gctx_gles,
+#endif
+    },
 };
 
-struct gctx *ngli_gctx_create(struct ngl_ctx *ctx)
+struct gctx *ngli_gctx_create(const struct ngl_config *config)
 {
-    struct ngl_config *config = &ctx->config;
-
     if (config->backend < 0 ||
-        config->backend >= NGLI_ARRAY_NB(backend_map) ||
-        !backend_map[config->backend]) {
+        config->backend >= NGLI_ARRAY_NB(backend_map)) {
         LOG(ERROR, "unknown backend %d", config->backend);
         return NULL;
     }
-    const struct gctx_class *class = backend_map[config->backend];
-    struct gctx *s = class->create(ctx);
+    if (!backend_map[config->backend].cls) {
+        LOG(ERROR, "backend \"%s\" not available with this build",
+            backend_map[config->backend].string_id);
+        return NULL;
+    }
+    const struct gctx_class *class = backend_map[config->backend].cls;
+    struct gctx *s = class->create(config);
     if (!s)
         return NULL;
-    s->ctx = ctx;
+    s->config = *config;
+    s->backend_str = backend_map[config->backend].string_id;
     s->class = class;
     return s;
 }
@@ -67,26 +81,25 @@ int ngli_gctx_resize(struct gctx *s, int width, int height, const int *viewport)
     return class->resize(s, width, height, viewport);
 }
 
-int ngli_gctx_draw(struct gctx *s, double t)
+int ngli_gctx_set_capture_buffer(struct gctx *s, void *capture_buffer)
 {
-    struct ngl_ctx *ctx = s->ctx;
     const struct gctx_class *class = s->class;
+    return class->set_capture_buffer(s, capture_buffer);
+}
 
-    int ret = class->pre_draw(s, t);
-    if (ret < 0)
-        goto end;
+int ngli_gctx_begin_draw(struct gctx *s, double t)
+{
+    return s->class->begin_draw(s, t);
+}
 
-    if (ctx->scene) {
-        LOG(DEBUG, "draw scene %s @ t=%f", ctx->scene->label, t);
-        ngli_node_draw(ctx->scene);
-    }
+int ngli_gctx_end_draw(struct gctx *s, double t)
+{
+    return s->class->end_draw(s, t);
+}
 
-end:;
-    int end_ret = class->post_draw(s, t);
-    if (end_ret < 0)
-        return end_ret;
-
-    return ret;
+int ngli_gctx_query_draw_time(struct gctx *s, int64_t *time)
+{
+    return s->class->query_draw_time(s, time);
 }
 
 void ngli_gctx_freep(struct gctx **sp)
@@ -102,14 +115,39 @@ void ngli_gctx_freep(struct gctx **sp)
     ngli_freep(sp);
 }
 
-void ngli_gctx_set_rendertarget(struct gctx *s, struct rendertarget *rt)
+int ngli_gctx_transform_cull_mode(struct gctx *s, int cull_mode)
 {
-    s->class->set_rendertarget(s, rt);
+    return s->class->transform_cull_mode(s, cull_mode);
 }
 
-struct rendertarget *ngli_gctx_get_rendertarget(struct gctx *s)
+void ngli_gctx_transform_projection_matrix(struct gctx *s, float *dst)
 {
-    return s->class->get_rendertarget(s);
+    s->class->transform_projection_matrix(s, dst);
+}
+
+void ngli_gctx_begin_render_pass(struct gctx *s, struct rendertarget *rt)
+{
+    s->class->begin_render_pass(s, rt);
+}
+
+void ngli_gctx_end_render_pass(struct gctx *s)
+{
+    s->class->end_render_pass(s);
+}
+
+void ngli_gctx_get_rendertarget_uvcoord_matrix(struct gctx *s, float *dst)
+{
+    s->class->get_rendertarget_uvcoord_matrix(s, dst);
+}
+
+struct rendertarget *ngli_gctx_get_default_rendertarget(struct gctx *s)
+{
+    return s->class->get_default_rendertarget(s);
+}
+
+const struct rendertarget_desc *ngli_gctx_get_default_rendertarget_desc(struct gctx *s)
+{
+    return s->class->get_default_rendertarget_desc(s);
 }
 
 void ngli_gctx_set_viewport(struct gctx *s, const int *viewport)
@@ -130,31 +168,6 @@ void ngli_gctx_set_scissor(struct gctx *s, const int *scissor)
 void ngli_gctx_get_scissor(struct gctx *s, int *scissor)
 {
     s->class->get_scissor(s, scissor);
-}
-
-void ngli_gctx_set_clear_color(struct gctx *s, const float *color)
-{
-    s->class->set_clear_color(s, color);
-}
-
-void ngli_gctx_get_clear_color(struct gctx *s, float *color)
-{
-    s->class->get_clear_color(s, color);
-}
-
-void ngli_gctx_clear_color(struct gctx *s)
-{
-    s->class->clear_color(s);
-}
-
-void ngli_gctx_clear_depth_stencil(struct gctx *s)
-{
-    s->class->clear_depth_stencil(s);
-}
-
-void ngli_gctx_invalidate_depth_stencil(struct gctx *s)
-{
-    s->class->invalidate_depth_stencil(s);
 }
 
 int ngli_gctx_get_preferred_depth_format(struct gctx *s)

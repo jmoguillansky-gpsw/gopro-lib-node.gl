@@ -1,0 +1,98 @@
+name: 'tests Windows'
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+
+jobs:
+  mingw:
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64 # Start a 64 bit Mingw environment
+          update: true
+
+      - name: Install dependencies
+        run: |
+          C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm --needed git make"
+          C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm --needed mingw-w64-x86_64-{toolchain,ffmpeg,python}"
+          C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm --needed mingw-w64-x86_64-python3-{pillow,pip}"
+          C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm --needed mingw-w64-x86_64-meson"
+
+      - name: Build
+        run: |
+          $env:CHERE_INVOKING = 'yes'  # Preserve the current working directory
+          C:\msys64\usr\bin\bash -lc "make -j$(($(nproc)+1)) TARGET_OS=MinGW-w64"
+  
+  win-msvc:
+
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: wsl-bash {0}
+
+    steps:
+      - uses: Vampire/setup-wsl@v1
+        with:
+          distribution: Ubuntu-20.04
+
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt -y update
+          sudo apt -y install build-essential zip
+          pip.exe install meson
+          wget https://github.com/jmoguillansky-gpsw/gopro-pkg/blob/master/external/win64/pkg-config.exe?raw=true -O pkg-config.exe
+
+      - name: Restore from cache and install vcpkg
+        uses: lukka/run-vcpkg@v6
+        with:
+          vcpkgGitCommitId: 595777db2332a3442b73f9af9f656355f207aec9
+          vcpkgTriplet: x64-windows
+          vcpkgArguments: pthreads opengl-registry ffmpeg[ffmpeg] sdl2
+          cleanAfterBuild: false
+
+      - name: vcpkg integrate install
+        run: |
+          cd vcpkg && ./vcpkg.exe integrate install
+
+      - name: Build
+        run: |
+          make -j8 TARGET_OS=Windows PKG_CONFIG="D:\\\\a\\\\gopro-lib-node.gl\\\\gopro-lib-node.gl\\\\pkg-config.exe" VCPKG_DIR="D:\\\\a\\\\gopro-lib-node.gl\\\\gopro-lib-node.gl\\\\vcpkg"
+
+#      - name: Setup debug session using tmate
+#        if: always()
+#        run: |
+#          sudo apt -y update
+#          #Install tmate
+#          sudo apt-get install -y tmate openssh-client
+#          # Generate ssh key if needed
+#          [ -e ~/.ssh/id_rsa ] || ssh-keygen -t rsa -f ~/.ssh/id_rsa -q -N ""
+#          # Run deamonized tmate
+#          echo Running tmate...
+#          tmate -S /tmp/tmate.sock new-session -d
+#          tmate -S /tmp/tmate.sock wait tmate-ready
+#          # Print connection info
+#          tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}'
+#
+#      - name: Wait for connection
+#        if: always()
+#        run: |
+#          # Wait for connection
+#          while [ -S /tmp/tmate.sock ]; do
+#            sleep 1
+#          done
+
+        
+#      - name: Run tests
+#        run: |
+#          make -j8 tests PYTHON="C:/hostedtoolcache/windows/Python/3.9.0/x64/python.exe" TARGET_OS=Windows

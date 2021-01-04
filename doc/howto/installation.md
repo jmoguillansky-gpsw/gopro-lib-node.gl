@@ -14,7 +14,7 @@ for building and running the complete **node.gl** stack:
 - **Graphviz**
 - **SDL2**
 
-## Quick user installation
+## Quick user installation on Linux and MacOS
 
 The following steps describe how to install `node.gl` and its dependencies in
 your home user directory, without polluting your system (aside from the system
@@ -38,29 +38,42 @@ number of parallel processes.
 
 **Note**: to leave the environment, you can use `deactivate`.
 
+## Quick user installation on Windows
+
+On Windows, the bootstrap is slightly more complex:
+
+- install [MSYS2](https://www.msys2.org/)
+- run MinGW64 shell (*NOT* MSYS2, "MINGW64" should be visible in the prompt)
+- run the following in the shell:
+```shell
+pacman -Syuu  # and restart the shell
+pacman -S git make
+pacman -S mingw-w64-x86_64-{toolchain,ffmpeg,python}
+pacman -S mingw-w64-x86_64-python-watchdog
+pacman -S mingw-w64-x86_64-python3-{pillow,pip}
+pacman -S mingw-w64-x86_64-pyside2-qt5
+pacman -S mingw-w64-x86_64-meson
+make TARGET_OS=MinGW-w64
+```
+
+Then you should be able to enter the environment and run the tools.
+
 ## Installation of `libnodegl` (the core library)
 
-### Build
+`libnodegl` uses [Meson][meson] for its build system. Its compilation and
+installation usually looks like the following:
 
-`make` is enough to build `libnodegl.a`.
+```sh
+meson setup builddir
+meson compile -C builddir
+meson install -C builddir
+```
 
-If you prefer a dynamic library, you can use the variable `SHARED`, such as
-`make SHARED=yes`.
+`meson configure` can be used to list the available options. See the [Meson
+documentation][meson-doc] for more information.
 
-If you need symbol debugging, you can use `make DEBUG=yes`.
-
-Make allow options to be combinable, so `make SHARED=yes DEBUG=yes` is valid.
-
-Additionally, `PYTHON` and `PKG_CONFIG` which respectively allows to customize
-`python` and `pkg-config` executable paths.
-
-### Installation
-
-`make install` will install the library in `PREFIX`, which you can override,
-for example using `make install PREFIX=/tmp/local`.
-
-You can check the installed version of `libnodegl` using `pkg-config
---modversion libnodegl`
+[meson]: https://mesonbuild.com/
+[meson-doc]: https://mesonbuild.com/Quick-guide.html#compiling-a-meson-project
 
 ## Installation of `ngl-tools`
 

@@ -121,15 +121,6 @@ def query_inplace(**idict):
             del odict['scene']
             scene.set_label(scene_name)
 
-            # Make extra adjustments to the scene according to user options
-            if idict.get('enable_hud'):
-                fr = odict['framerate']
-                measure_window = fr[0] / (4 * fr[1])  # 1/4-second measurement window
-                scene = ngl.HUD(scene,
-                                measure_window=measure_window,
-                                bg_color=(0.0, 0.0, 0.0, 0.8),
-                                aspect_ratio=odict['aspect_ratio'])
-
             # Prepare output data
             odict['scene'] = scene.dot() if idict.get('fmt') == 'dot' else scene.serialize()
 

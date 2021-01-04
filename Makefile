@@ -19,22 +19,103 @@
 # under the License.
 #
 
-PREFIX ?= $(PWD)/nodegl-env
+PYTHON_MAJOR = 3
 
-include common.mak
+#
+# User configuration
+#
+DEBUG      ?= no
+COVERAGE   ?= no
+TARGET_OS  ?= $(shell uname -s)
 
-SXPLAYER_VERSION ?= 9.5.1
+ifeq ($(TARGET_OS),Windows)
+PYTHON     ?= python.exe
+PREFIX     ?= nodegl-env
+W_PWD = $(shell wslpath -wa .)
+W_PREFIX ?= $(W_PWD)\$(PREFIX)
+$(info PYTHON: $(PYTHON))
+$(info PREFIX: $(PREFIX))
+$(info W_PREFIX: $(W_PREFIX))
+else
+PYTHON     ?= python$(if $(shell which python$(PYTHON_MAJOR) 2> /dev/null),$(PYTHON_MAJOR),)
+PREFIX     ?= $(PWD)/nodegl-env
+endif
 
-# Prevent headers from being rewritten, which would cause unecessary
-# recompilations between `make` calls.
-INSTALL = install -C
+DEBUG_GL    ?= no
+DEBUG_MEM   ?= no
+DEBUG_SCENE ?= no
+TESTS_SUITE ?=
+V           ?=
 
+ifeq ($(TARGET_OS), Windows)
+VCVARS64 ?= "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+ACTIVATE = $(VCVARS64) \&\& $(PREFIX)\\Scripts\\activate.bat
+VCPKG_DIR ?= C:\\vcpkg
+PKG_CONFIG ?= C:\\msys64\\usr\\bin\\pkg-config.exe
+SET_PKG_CONFIG_PATH = PKG_CONFIG_PATH="$(W_PREFIX)\Lib\pkgconfig" WSLENV=PKG_CONFIG_PATH/w
+CMD = $(SET_PKG_CONFIG_PATH) cmd.exe /C
+else
 ACTIVATE = $(PREFIX)/bin/activate
+endif
+
+ifeq ($(TARGET_OS), Windows)
+  ifneq ($(shell $(CMD) $(PYTHON) -c "import sys;print(sys.version_info.major)"),$(PYTHON_MAJOR))
+    $(error "Python $(PYTHON_MAJOR) not found")
+  endif
+else
+  ifneq ($(shell $(PYTHON) -c "import sys;print(sys.version_info.major)"),$(PYTHON_MAJOR))
+    $(error "Python $(PYTHON_MAJOR) not found")
+  endif
+endif
 
 RPATH_LDFLAGS ?= -Wl,-rpath,$(PREFIX)/lib
-ifeq ($(TARGET_OS),Darwin)
-	LIBNODEGL_EXTRA_LDFLAGS   = -Wl,-install_name,@rpath/libnodegl.dylib
-	LIBSXPLAYER_EXTRA_LDFLAGS = -Wl,-install_name,@rpath/libsxplayer.dylib
+
+ifeq ($(TARGET_OS),Windows)
+MESON_SETUP   = meson setup --backend vs --prefix="$(W_PREFIX)" -Drpath=true
+MESON_SETUP_NINJA   = meson setup --backend ninja --prefix="$(W_PREFIX)" -Drpath=true
+else
+MESON_SETUP   = meson setup --prefix=$(PREFIX) --pkg-config-path=$(PREFIX)/lib/pkgconfig -Drpath=true
+endif
+# MAKEFLAGS= is a workaround for the issue described here:
+# https://github.com/ninja-build/ninja/issues/1139#issuecomment-724061270
+ifeq ($(TARGET_OS),Windows)
+MESON_COMPILE = meson compile
+else
+MESON_COMPILE = MAKEFLAGS= meson compile
+endif
+MESON_INSTALL = meson install
+ifeq ($(COVERAGE),yes)
+MESON_SETUP += -Db_coverage=true
+DEBUG = yes
+endif
+ifeq ($(DEBUG),yes)
+MESON_SETUP += --buildtype=debugoptimized
+else
+MESON_SETUP += --buildtype=release
+ifneq ($(TARGET_OS),MinGW-w64)
+MESON_SETUP += -Db_lto=true
+endif
+endif
+ifneq ($(V),)
+MESON_COMPILE += -v
+endif
+NODEGL_DEBUG_OPTS-$(DEBUG_GL)    += gl
+NODEGL_DEBUG_OPTS-$(DEBUG_MEM)   += mem
+NODEGL_DEBUG_OPTS-$(DEBUG_SCENE) += scene
+ifneq ($(NODEGL_DEBUG_OPTS-yes),)
+NODEGL_DEBUG_OPTS = -Ddebug_opts=$(shell echo $(NODEGL_DEBUG_OPTS-yes) | tr ' ' ',')
+endif
+
+# Workaround Debian/Ubuntu bug; see https://github.com/mesonbuild/meson/issues/5925
+ifeq ($(TARGET_OS),Linux)
+DISTRIB_ID := $(or $(shell lsb_release -si 2>/dev/null),none)
+ifeq ($(DISTRIB_ID),$(filter $(DISTRIB_ID),Ubuntu Debian))
+MESON_SETUP += --libdir lib
+endif
+endif
+
+ifneq ($(TESTS_SUITE),)
+MESON_TESTS_SUITE_OPTS += --suite $(TESTS_SUITE)
 endif
 
 all: ngl-tools-install pynodegl-utils-install
@@ -42,62 +123,153 @@ all: ngl-tools-install pynodegl-utils-install
 	@echo "    Install completed."
 	@echo
 	@echo "    You can now enter the venv with:"
+ifeq ($(TARGET_OS),Windows)
+	@echo "        . $(PREFIX)\\Scripts\\activate.bat"
+else
 	@echo "        . $(ACTIVATE)"
+endif
 	@echo
 
 ngl-tools-install: nodegl-install
-	PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig LDFLAGS=$(RPATH_LDFLAGS) $(MAKE) -C ngl-tools install PREFIX=$(PREFIX) DEBUG=$(DEBUG)
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& $(MESON_SETUP) ngl-tools builddir\\ngl-tools \&\& $(MESON_COMPILE) -C builddir\\ngl-tools \&\& $(MESON_INSTALL) -C builddir\\ngl-tools)
+else
+	(. $(ACTIVATE) && $(MESON_SETUP) ngl-tools builddir/ngl-tools && $(MESON_COMPILE) -C builddir/ngl-tools && $(MESON_INSTALL) -C builddir/ngl-tools)
+endif
 
 pynodegl-utils-install: pynodegl-utils-deps-install
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& pip -v install -e pynodegl-utils)
+else
 	(. $(ACTIVATE) && pip -v install -e ./pynodegl-utils)
+endif
 
+#
 # pynodegl-install is in dependency to prevent from trying to install pynodegl
 # from its requirements. Pulling pynodegl from requirements has two main issue:
 # it tries to get it from PyPi (and we want to install the local pynodegl
 # version), and it would fail anyway because pynodegl is currently not
 # available on PyPi.
+#
+# We do not pull the requirements on Windows because of various issues:
+# - PySide2 can't be pulled (required to be installed by the user outside the
+#   Python virtualenv)
+# - Pillow fails to find zlib (required to be installed by the user outside the
+#   Python virtualenv)
+# - ngl-control can not currently work because of:
+#     - temporary files handling
+#     - subprocess usage, passing fd is not supported on Windows
+#     - subprocess usage, Windows cannot execute directly hooks shell scripts
+#
+# Still, we want the module to be installed so we can access the scene()
+# decorator and other related utils.
+#
 pynodegl-utils-deps-install: pynodegl-install
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& pip install -r pynodegl-utils\\requirements.txt)
+else ifneq ($(TARGET_OS),MinGW-w64)
 	(. $(ACTIVATE) && pip install -r ./pynodegl-utils/requirements.txt)
+endif
 
 pynodegl-install: pynodegl-deps-install
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& pip -v install -e .\\pynodegl)
+	#Copy DLLs to prefix
+	($(CMD) copy builddir\\sxplayer\\*.dll pynodegl\\.)
+	($(CMD) copy builddir\\libnodegl\\*.dll pynodegl\\.)
+	($(CMD) copy builddir\\sxplayer\\*.dll $(PREFIX)\\Scripts\\.)
+	($(CMD) copy builddir\\libnodegl\\*.dll $(PREFIX)\\Scripts\\.)
+else
 	(. $(ACTIVATE) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig LDFLAGS=$(RPATH_LDFLAGS) pip -v install -e ./pynodegl)
+endif
 
 pynodegl-deps-install: $(PREFIX) nodegl-install
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& pip install -r pynodegl\\requirements.txt)
+else
 	(. $(ACTIVATE) && pip install -r ./pynodegl/requirements.txt)
+endif
 
-nodegl-install: sxplayer-install
-	PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig LDFLAGS="$(RPATH_LDFLAGS) $(LIBNODEGL_EXTRA_LDFLAGS)" $(MAKE) -C libnodegl install PREFIX=$(PREFIX) DEBUG=$(DEBUG) SHARED=yes INSTALL="$(INSTALL)"
+nodegl-install: nodegl-setup
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& $(MESON_COMPILE) -C builddir\\libnodegl \&\& $(MESON_INSTALL) -C builddir\\libnodegl)
+	# patch libnodegl.pc TODO: remove
+	sed -i -e 's/Libs.private: .*/Libs.private: OpenGL32.lib gdi32.lib/' nodegl-env/Lib/pkgconfig/libnodegl.pc
+else
+	(. $(ACTIVATE) && $(MESON_COMPILE) -C builddir/libnodegl && $(MESON_INSTALL) -C builddir/libnodegl)
+endif
 
-sxplayer-install: sxplayer $(PREFIX)
-	PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig LDFLAGS="$(RPATH_LDFLAGS) $(LIBSXPLAYER_EXTRA_LDFLAGS)" $(MAKE) -C sxplayer install PREFIX=$(PREFIX) DEBUG=$(DEBUG) SHARED=yes INSTALL="$(INSTALL)"
+nodegl-setup: sxplayer-install
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& $(MESON_SETUP) $(NODEGL_DEBUG_OPTS) --default-library shared libnodegl builddir\\libnodegl)
+else
+	(. $(ACTIVATE) && $(MESON_SETUP) $(NODEGL_DEBUG_OPTS) libnodegl builddir/libnodegl)
+endif
 
-# Note for developers: in order to customize the sxplayer you're building
-# against, you can use your own sources post-install:
-#
-#     % unlink sxplayer
-#     % ln -snf /path/to/sxplayer.git sxplayer
-#     % touch /path/to/sxplayer.git
-#
-# The `touch` command makes sure the source target directory is more recent
-# than the prerequisite directory of the sxplayer rule. If this isn't true, the
-# symlink will be re-recreated on the next `make` call
-sxplayer: sxplayer-$(SXPLAYER_VERSION)
-	ln -snf $< $@
+sxplayer-install: external-download $(PREFIX)
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& $(MESON_SETUP) --default-library shared external\\sxplayer builddir\\sxplayer \&\& $(MESON_COMPILE) -C builddir\\sxplayer \&\& $(MESON_INSTALL) -C builddir\\sxplayer)
+else
+	(. $(ACTIVATE) && $(MESON_SETUP) --default-library shared external/sxplayer builddir/sxplayer && $(MESON_COMPILE) -C builddir/sxplayer && $(MESON_INSTALL) -C builddir/sxplayer)
+endif
 
-sxplayer-$(SXPLAYER_VERSION): sxplayer-$(SXPLAYER_VERSION).tar.gz
-	$(TAR) xf $<
-
-sxplayer-$(SXPLAYER_VERSION).tar.gz:
-	$(CURL) -L https://github.com/Stupeflix/sxplayer/archive/v$(SXPLAYER_VERSION).tar.gz -o $@
+external-download:
+	$(MAKE) -C external
 
 $(PREFIX):
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(PYTHON) -m venv $(PREFIX))
+	($(CMD) copy $(PKG_CONFIG) nodegl-env\\Scripts)
+	($(CMD) copy $(VCPKG_DIR)\\packages\\ffmpeg_x64-windows\\tools\\ffmpeg\\*.exe $(PREFIX)\\Scripts\\.)
+	($(CMD) copy $(VCPKG_DIR)\\packages\\ffmpeg_x64-windows\\bin\\*.dll pynodegl\\.)
+	($(CMD) copy $(VCPKG_DIR)\\packages\\pthreads_x64-windows\\bin\\*.dll pynodegl\\.)
+	($(CMD) copy $(VCPKG_DIR)\\packages\\ffmpeg_x64-windows\\bin\\*.dll $(PREFIX)\\Scripts\\.)
+	($(CMD) copy $(VCPKG_DIR)\\packages\\pthreads_x64-windows\\bin\\*.dll $(PREFIX)\\Scripts\\.)
+	($(CMD) mkdir $(PREFIX)\\Lib\\pkgconfig)
+	($(CMD) copy ${VCPKG_DIR}\\packages\\ffmpeg_x64-windows\\lib\\pkgconfig\\*.pc $(PREFIX)\\Lib\\pkgconfig\\.)
+	#patch ffmpeg pkg-config files
+	(sed -i -e 's/\/cygdrive\/c/C:/g' $(PREFIX)/Lib/pkgconfig/*.pc)
+	(sed -i -e 's/\/cygdrive\/d/D:/g' $(PREFIX)/Lib/pkgconfig/*.pc)
+	($(CMD) copy ${VCPKG_DIR}\\packages\\sdl2_x64-windows\\lib\\pkgconfig\\*.pc $(PREFIX)\\Lib\\pkgconfig\\.)
+	#patch SDL2 pkg-config file
+	(sed -i -e 's/prefix=.*/prefix=$(VCPKG_DIR)\/packages\/sdl2_x64-windows/' $(PREFIX)/Lib/pkgconfig/sdl2.pc)
+	(sed -i -e 's/Libs: .*/Libs: -L\${libdir} -lSDL2 -L\${libdir}/manual-link -lSDL2main/' $(PREFIX)/Lib/pkgconfig/sdl2.pc)
+	(sed -i -e 's/\\/\//g' $(PREFIX)/Lib/pkgconfig/sdl2.pc)
+	($(CMD) $(ACTIVATE) \&\& pip install meson ninja)
+else ifeq ($(TARGET_OS),MinGW-w64)
+	#
+	# We do not pull meson from pip on mingw for the same reasons we don't pull
+	# Pillow and PySide2. We require the users to have it on their system.
+	#
+	$(PYTHON) -m venv --system-site-packages $(PREFIX)
+else
 	$(PYTHON) -m venv $(PREFIX)
+	(. $(ACTIVATE) && pip install meson ninja)
+endif
 
-tests: ngl-tools-install pynodegl-utils-install nodegl-tests
-	(. $(ACTIVATE) && $(MAKE) -C tests)
+tests: nodegl-tests tests-setup
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& meson test $(MESON_TESTS_SUITE_OPTS) -C builddir\\tests)
+else
+	(. $(ACTIVATE) && meson test $(MESON_TESTS_SUITE_OPTS) -C builddir/tests)
+endif
 
-nodegl-%: nodegl-install
-	(. $(ACTIVATE) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig LDFLAGS=$(RPATH_LDFLAGS) $(MAKE) -C libnodegl $(subst nodegl-,,$@) DEBUG=$(DEBUG))
+tests-setup: ngl-tools-install pynodegl-utils-install
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& $(MESON_SETUP_NINJA) builddir\\tests tests)
+else
+	(. $(ACTIVATE) && $(MESON_SETUP) builddir/tests tests)
+endif
+
+nodegl-tests: nodegl-install
+ifeq ($(TARGET_OS),Windows)
+	($(CMD) $(ACTIVATE) \&\& meson test -C builddir\\libnodegl)
+else
+	(. $(ACTIVATE) && meson test -C builddir/libnodegl)
+endif
+
+nodegl-%: nodegl-setup
+	(. $(ACTIVATE) && $(MESON_COMPILE) -C builddir/libnodegl $(subst nodegl-,,$@))
 
 clean_py:
 	$(RM) pynodegl/nodes_def.pyx
@@ -109,26 +281,28 @@ clean_py:
 	$(RM) -r pynodegl-utils/pynodegl_utils.egg-info
 	$(RM) -r pynodegl-utils/.eggs
 
-clean_gcx:
-	$(RM) libnodegl/*.gcda libnodegl/*.gcno
-	$(RM) ngl-tools/*.gcda ngl-tools/*.gcno
-
-clean: clean_gcx clean_py
-	PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig $(MAKE) -C libnodegl clean
-	PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig $(MAKE) -C ngl-tools clean
+clean: clean_py
+	$(RM) -r builddir/sxplayer
+	$(RM) -r builddir/libnodegl
+	$(RM) -r builddir/ngl-tools
+	$(RM) -r builddir/tests
 
 # You need to build and run with COVERAGE set to generate data.
 # For example: `make clean && make -j8 tests COVERAGE=yes`
-coverage:
-	mkdir -p ngl-cov
-	gcovr -r libnodegl --html-details --html-title "node.gl coverage" --print-summary -o ngl-cov/index.html
+# We don't use `meson coverage` here because of
+# https://github.com/mesonbuild/meson/issues/7895
+coverage-html:
+	(. $(ACTIVATE) && ninja -C builddir/libnodegl coverage-html)
+coverage-xml:
+	(. $(ACTIVATE) && ninja -C builddir/libnodegl coverage-xml)
 
 .PHONY: all
 .PHONY: ngl-tools-install
 .PHONY: pynodegl-utils-install pynodegl-utils-deps-install
 .PHONY: pynodegl-install pynodegl-deps-install
-.PHONY: nodegl-install
+.PHONY: nodegl-install nodegl-setup
 .PHONY: sxplayer-install
-.PHONY: tests
-.PHONY: clean clean_gcx clean_py
-.PHONY: coverage
+.PHONY: tests tests-setup
+.PHONY: clean clean_py
+.PHONY: coverage-html coverage-xml
+.PHONY: external-download

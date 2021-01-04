@@ -31,11 +31,14 @@ from pynodegl_utils.tests.cmp_fingerprint import test_fingerprint
 
 
 _PARTICULES_COMPUTE = '''
-layout(local_size_x = %(local_size)d, local_size_y = %(local_size)d, local_size_z = 1) in;
+layout(local_size_x = %(local_size_x)d, local_size_y = %(local_size_y)d, local_size_z = %(local_size_z)d) in;
 
 void main()
 {
-    uint i = gl_WorkGroupID.x * gl_WorkGroupSize.x * gl_WorkGroupSize.y + gl_LocalInvocationIndex;
+    uvec3 total_size = gl_WorkGroupSize * gl_NumWorkGroups;
+    uint i = gl_GlobalInvocationID.z * total_size.x * total_size.y
+           + gl_GlobalInvocationID.y * total_size.x
+           + gl_GlobalInvocationID.x;
     vec3 iposition = idata.positions[i];
     vec2 ivelocity = idata.velocities[i];
     vec3 position;
@@ -50,7 +53,7 @@ void main()
 _PARTICULES_VERT = '''
 void main()
 {
-    vec4 position = ngl_position + vec4(data.positions[gl_InstanceID], 0.0);
+    vec4 position = ngl_position + vec4(data.positions[ngl_instance_index], 0.0);
     ngl_out_pos = ngl_projection_matrix * ngl_modelview_matrix * position;
 }
 '''
@@ -58,15 +61,17 @@ void main()
 
 @test_fingerprint(nb_keyframes=10, tolerance=1)
 @scene()
-def compute_particules(cfg):
+def compute_particles(cfg):
     random.seed(0)
     cfg.duration = 10
-    local_size = 4
-    nb_particules = 128
+    workgroups = (2, 1, 4)
+    local_size = (4, 4, 1)
+    nb_particles = workgroups[0] * workgroups[1] * workgroups[2] \
+                 * local_size[0] * local_size[1] * local_size[2]
 
     positions = array.array('f')
     velocities = array.array('f')
-    for i in range(nb_particules):
+    for i in range(nb_particles):
         positions.extend([
             random.uniform(-2.0, 1.0),
             random.uniform(-1.0, 1.0),
@@ -84,7 +89,7 @@ def compute_particules(cfg):
         ],
         layout='std430',
     )
-    opositions = ngl.Block(fields=[ngl.BufferVec3(count=nb_particules, label='positions')], layout='std430')
+    opositions = ngl.Block(fields=[ngl.BufferVec3(count=nb_particles, label='positions')], layout='std140')
 
     animkf = [
         ngl.AnimKeyFrameFloat(0, 0),
@@ -93,14 +98,17 @@ def compute_particules(cfg):
     time = ngl.AnimatedFloat(animkf)
     duration = ngl.UniformFloat(cfg.duration)
 
-    group_size = nb_particules / local_size
-    program = ngl.ComputeProgram(_PARTICULES_COMPUTE % dict(local_size=local_size))
-    compute = ngl.Compute(nb_particules, 1, 1, program)
+    program = ngl.ComputeProgram(_PARTICULES_COMPUTE % dict(
+        local_size_x=local_size[0],
+        local_size_y=local_size[1],
+        local_size_z=local_size[2]))
+    program.update_properties(odata=ngl.ResourceProps(writable=True))
+    compute = ngl.Compute(workgroups[0], workgroups[1], workgroups[2], program)
     compute.update_resources(time=time, duration=duration, idata=ipositions, odata=opositions)
 
     circle = ngl.Circle(radius=0.05)
     program = ngl.Program(vertex=_PARTICULES_VERT, fragment=cfg.get_frag('color'))
-    render = ngl.Render(circle, program, nb_instances=nb_particules)
+    render = ngl.Render(circle, program, nb_instances=nb_particles)
     render.update_frag_resources(color=ngl.UniformVec4(value=COLORS['sgreen']))
     render.update_vert_resources(data=opositions)
 
@@ -198,7 +206,7 @@ def compute_histogram(cfg, show_dbg_points=False):
     texture = ngl.Texture2D(width=size, height=size, data_src=texture_buffer)
     texture.set_format('r32g32b32a32_sfloat')
 
-    histogram_block = ngl.Block(layout='std430', label='histogram')
+    histogram_block = ngl.Block(layout='std140', label='histogram')
     histogram_block.add_fields(
         ngl.BufferUInt(hsize, label='r'),
         ngl.BufferUInt(hsize, label='g'),
@@ -211,6 +219,7 @@ def compute_histogram(cfg, show_dbg_points=False):
     group_size = hsize // local_size
     clear_histogram_shader = _COMPUTE_HISTOGRAM_CLEAR % shader_params
     clear_histogram_program = ngl.ComputeProgram(clear_histogram_shader)
+    clear_histogram_program.update_properties(hist=ngl.ResourceProps(writable=True))
     clear_histogram = ngl.Compute(
         group_size,
         1,
@@ -223,6 +232,7 @@ def compute_histogram(cfg, show_dbg_points=False):
     group_size = size // local_size
     exec_histogram_shader = _COMPUTE_HISTOGRAM_EXEC % shader_params
     exec_histogram_program = ngl.ComputeProgram(exec_histogram_shader)
+    exec_histogram_program.update_properties(hist=ngl.ResourceProps(writable=True))
     exec_histogram = ngl.Compute(
         group_size,
         group_size,
@@ -272,15 +282,15 @@ def compute_animation(cfg):
     vertices_data = array.array('f', [
         -0.5, -0.5, 0.0,
          0.5, -0.5, 0.0,
-         0.5,  0.5, 0.0,
         -0.5,  0.5, 0.0,
+         0.5,  0.5, 0.0,
     ])
     nb_vertices = 4
 
     input_vertices = ngl.BufferVec3(data=vertices_data, label='vertices')
     output_vertices = ngl.BufferVec3(data=vertices_data, label='vertices')
     input_block = ngl.Block(fields=[input_vertices], layout='std140')
-    output_block = ngl.Block(fields=[output_vertices], layout='std430')
+    output_block = ngl.Block(fields=[output_vertices], layout='std140')
 
     rotate_animkf = [ngl.AnimKeyFrameFloat(0, 0),
                      ngl.AnimKeyFrameFloat(cfg.duration, 360)]
@@ -288,11 +298,12 @@ def compute_animation(cfg):
     transform = ngl.UniformMat4(transform=rotate)
 
     program = ngl.ComputeProgram(compute_shader)
+    program.update_properties(dst=ngl.ResourceProps(writable=True))
     compute = ngl.Compute(nb_vertices / (local_size ** 2), 1, 1, program)
     compute.update_resources(transform=transform, src=input_block, dst=output_block)
 
     quad_buffer = ngl.BufferVec3(block=output_block, block_field=0)
-    geometry = ngl.Geometry(quad_buffer, topology='triangle_fan')
+    geometry = ngl.Geometry(quad_buffer, topology='triangle_strip')
     program = ngl.Program(vertex=cfg.get_vert('color'), fragment=cfg.get_frag('color'))
     render = ngl.Render(geometry, program)
     render.update_frag_resources(color=ngl.UniformVec4(value=COLORS['sgreen']))

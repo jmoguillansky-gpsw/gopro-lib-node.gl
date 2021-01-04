@@ -77,6 +77,8 @@ int ngli_hwconv_init(struct hwconv *hwconv, struct ngl_ctx *ctx,
         .nb_colors = 1,
         .colors[0] = {
             .attachment = texture,
+            .load_op    = NGLI_LOAD_OP_CLEAR,
+            .store_op   = NGLI_STORE_OP_STORE,
         }
     };
     hwconv->rt = ngli_rendertarget_create(gctx);
@@ -97,8 +99,8 @@ int ngli_hwconv_init(struct hwconv *hwconv, struct ngl_ctx *ctx,
     static const float vertices[] = {
         -1.0f, -1.0f, 0.0f, 0.0f,
          1.0f, -1.0f, 1.0f, 0.0f,
-         1.0f,  1.0f, 1.0f, 1.0f,
         -1.0f,  1.0f, 0.0f, 1.0f,
+         1.0f,  1.0f, 1.0f, 1.0f,
     };
     hwconv->vertices = ngli_buffer_create(gctx);
     if (!hwconv->vertices)
@@ -128,8 +130,8 @@ int ngli_hwconv_init(struct hwconv *hwconv, struct ngl_ctx *ctx,
     struct pipeline_params pipeline_params = {
         .type          = NGLI_PIPELINE_TYPE_GRAPHICS,
         .graphics      = {
-            .topology    = NGLI_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN,
-            .state       = ctx->graphicstate,
+            .topology    = NGLI_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
+            .state       = NGLI_GRAPHICSTATE_DEFAULTS,
             .rt_desc     = rt_desc,
         },
     };
@@ -149,7 +151,8 @@ int ngli_hwconv_init(struct hwconv *hwconv, struct ngl_ctx *ctx,
     if (!hwconv->crafter)
         return NGL_ERROR_MEMORY;
 
-    ret = ngli_pgcraft_craft(hwconv->crafter, &pipeline_params, &crafter_params);
+    struct pipeline_resource_params pipeline_resource_params = {0};
+    ret = ngli_pgcraft_craft(hwconv->crafter, &pipeline_params, &pipeline_resource_params, &crafter_params);
     if (ret < 0)
         return ret;
 
@@ -158,6 +161,10 @@ int ngli_hwconv_init(struct hwconv *hwconv, struct ngl_ctx *ctx,
         return NGL_ERROR_MEMORY;
 
     ret = ngli_pipeline_init(hwconv->pipeline, &pipeline_params);
+    if (ret < 0)
+        return ret;
+
+    ret = ngli_pipeline_set_resources(hwconv->pipeline, &pipeline_resource_params);
     if (ret < 0)
         return ret;
 
@@ -171,16 +178,13 @@ int ngli_hwconv_convert_image(struct hwconv *hwconv, const struct image *image)
     ngli_assert(hwconv->src_params.layout == image->params.layout);
 
     struct rendertarget *rt = hwconv->rt;
-    struct rendertarget *prev_rt = ngli_gctx_get_rendertarget(gctx);
-    ngli_gctx_set_rendertarget(gctx, rt);
+    ngli_gctx_begin_render_pass(gctx, rt);
 
     int prev_vp[4] = {0};
     ngli_gctx_get_viewport(gctx, prev_vp);
 
     const int vp[4] = {0, 0, rt->width, rt->height};
     ngli_gctx_set_viewport(gctx, vp);
-
-    ngli_gctx_clear_color(gctx);
 
     struct pipeline *pipeline = hwconv->pipeline;
 
@@ -217,7 +221,7 @@ int ngli_hwconv_convert_image(struct hwconv *hwconv, const struct image *image)
 
     ngli_pipeline_draw(hwconv->pipeline, 4, 1);
 
-    ngli_gctx_set_rendertarget(gctx, prev_rt);
+    ngli_gctx_end_render_pass(gctx);
     ngli_gctx_set_viewport(gctx, prev_vp);
 
     return 0;

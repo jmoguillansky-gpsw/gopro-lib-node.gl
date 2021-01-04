@@ -234,19 +234,19 @@ def audiotex(cfg, freq_precision=7, overlay=0.6):
     return render
 
 
-@scene(particules=scene.Range(range=[1, 1023]))
-def particules(cfg, particules=32):
+@scene(particles=scene.Range(range=[1, 1023]))
+def particles(cfg, particles=32):
     '''Particules demo using compute shaders and instancing'''
     random.seed(0)
 
-    compute_shader = cfg.get_comp('particules')
-    vertex_shader = cfg.get_vert('particules')
+    compute_shader = cfg.get_comp('particles')
+    vertex_shader = cfg.get_vert('particles')
     fragment_shader = cfg.get_frag('color')
 
     cfg.duration = 6
 
     x = 64
-    p = x * particules
+    p = x * particles
 
     positions = array.array('f')
     velocities = array.array('f')
@@ -273,8 +273,9 @@ def particules(cfg, particules=32):
     uduration = ngl.UniformFloat(cfg.duration)
 
     cp = ngl.ComputeProgram(compute_shader)
+    cp.update_properties(opositions=ngl.ResourceProps(writable=True))
 
-    c = ngl.Compute(x, particules, 1, cp)
+    c = ngl.Compute(x, particles, 1, cp)
     c.update_resources(
         time=utime,
         duration=uduration,
@@ -294,7 +295,7 @@ def particules(cfg, particules=32):
         fragment=fragment_shader,
     )
     p.update_vert_out_vars(var_uvcoord=ngl.IOVec2(), var_tex0_coord=ngl.IOVec2())
-    r = ngl.Render(quad, p, nb_instances=particules)
+    r = ngl.Render(quad, p, nb_instances=particles)
     r.update_frag_resources(color=ngl.UniformVec4(value=(0, .6, .8, .9)))
     r.update_vert_resources(positions=opositions)
 
@@ -512,6 +513,7 @@ def histogram(cfg):
     g.add_children(rtt)
 
     compute_program = ngl.ComputeProgram(cfg.get_comp('histogram-clear'))
+    compute_program.update_properties(hist=ngl.ResourceProps(writable=True))
     compute = ngl.Compute(256, 1, 1, compute_program, label='histogram-clear')
     compute.update_resources(hist=h)
     g.add_children(compute)
@@ -522,6 +524,7 @@ def histogram(cfg):
     compute_program = ngl.ComputeProgram(compute_shader)
     compute = ngl.Compute(group_size, group_size, 1, compute_program, label='histogram-exec')
     compute.update_resources(hist=h, source=proxy)
+    compute_program.update_properties(hist=ngl.ResourceProps(writable=True))
     compute_program.update_properties(source=ngl.ResourceProps(as_image=True))
     g.add_children(compute)
 

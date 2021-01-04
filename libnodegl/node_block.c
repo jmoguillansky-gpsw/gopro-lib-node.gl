@@ -68,6 +68,7 @@ static const struct param_choices layout_choices = {
                                        NGL_NODE_BUFFERUIVEC3,           \
                                        NGL_NODE_BUFFERUIVEC4,           \
                                        NGL_NODE_BUFFERMAT4,             \
+                                       NGL_NODE_UNIFORMBOOL,            \
                                        NGL_NODE_UNIFORMFLOAT,           \
                                        NGL_NODE_UNIFORMVEC2,            \
                                        NGL_NODE_UNIFORMVEC3,            \
@@ -205,7 +206,7 @@ static void update_uniform_field(uint8_t *dst,
                                  const struct block_field *fi)
 {
     const struct variable_priv *uniform = node->priv_data;
-    memcpy(dst, uniform->data, uniform->data_size);
+    ngli_block_field_copy(fi, dst, uniform->data);
 }
 
 static void update_buffer_field(uint8_t *dst,
@@ -213,11 +214,7 @@ static void update_buffer_field(uint8_t *dst,
                                 const struct block_field *fi)
 {
     const struct buffer_priv *buffer = node->priv_data;
-    if (buffer->data_stride == fi->stride)
-        memcpy(dst, buffer->data, fi->size);
-    else
-        for (int i = 0; i < buffer->count; i++)
-            memcpy(dst + i * fi->stride, buffer->data + i * buffer->data_stride, buffer->data_stride);
+    ngli_block_field_copy(fi, dst, buffer->data);
 }
 
 enum field_type { IS_SINGLE, IS_ARRAY };

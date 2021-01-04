@@ -28,7 +28,7 @@ setup(name='pynodegl-utils',
       install_requires=['pynodegl'],
       entry_points={
           'console_scripts': [
-              'ngl-viewer = pynodegl_utils.viewer:run',
+              'ngl-control = pynodegl_utils.controller:run',
               'ngl-test = pynodegl_utils.tests:run',
           ],
       },
@@ -38,6 +38,7 @@ setup(name='pynodegl-utils',
               'examples/shaders/*.frag',
               'examples/shaders/*.comp',
               'examples/shaders/*.vert',
+              'hooks/hook.*',
           ],
       }
 )

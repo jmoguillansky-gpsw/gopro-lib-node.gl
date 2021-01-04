@@ -1,8 +1,5 @@
-*.d
-*.exe
-*.o
+/builddir
 nodegl-env/
-sxplayer*
-*.gcda
-*.gcno
-ngl-cov/
+/sxplayer*
+/external/win64
+external/token.cfg

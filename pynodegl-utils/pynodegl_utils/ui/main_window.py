@@ -29,7 +29,6 @@ from pynodegl_utils.config import Config
 from pynodegl_utils.scriptsmgr import ScriptsManager
 from pynodegl_utils.hooks import HooksController, HooksCaller
 
-from pynodegl_utils.ui.player_view import PlayerView
 from pynodegl_utils.ui.graph_view import GraphView
 from pynodegl_utils.ui.export_view import ExportView
 from pynodegl_utils.ui.hooks_view import HooksView
@@ -42,14 +41,14 @@ class MainWindow(QtWidgets.QSplitter):
 
     error = QtCore.Signal(str)
 
-    def __init__(self, module_pkgname, hooksdir):
+    def __init__(self, module_pkgname, hooksdirs):
         super().__init__(QtCore.Qt.Horizontal)
-        self._win_title_base = 'Node.gl viewer'
+        self._win_title_base = 'Node.gl controller'
         self.setWindowTitle(self._win_title_base)
 
         self._module_pkgname = module_pkgname
         self._scripts_mgr = ScriptsManager(module_pkgname)
-        self._hooks_caller = HooksCaller(hooksdir)
+        self._hooks_caller = HooksCaller(hooksdirs)
 
         get_scene_func = self._get_scene
 
@@ -61,18 +60,16 @@ class MainWindow(QtWidgets.QSplitter):
             geometry = QtCore.QRect(*rect)
             self.setGeometry(geometry)
 
-        player_view = PlayerView(get_scene_func, self._config)
         graph_view = GraphView(get_scene_func, self._config)
         export_view = ExportView(get_scene_func, self._config)
-        hooks_view = HooksView(self._hooks_caller)
+        hooks_view = HooksView(self._hooks_caller, self._config)
         self._medias_view = MediasView(self._config)
         serial_view = SerialView(get_scene_func)
 
         self._tabs = [
-            ('Player view', player_view),
+            ('Hooks', hooks_view),
             ('Graph view', graph_view),
             ('Export', export_view),
-            ('Hooks', hooks_view),
             ('Medias', self._medias_view),
             ('Serialization', serial_view),
         ]
@@ -95,7 +92,6 @@ class MainWindow(QtWidgets.QSplitter):
         self._scene_toolbar.logLevelChanged.connect(self._config.set_log_level)
         self._scene_toolbar.clearColorChanged.connect(self._config.set_clear_color)
         self._scene_toolbar.backendChanged.connect(self._config.set_backend)
-        self._scene_toolbar.hudChanged.connect(self._config.set_hud)
 
         self._errbuf = QtWidgets.QPlainTextEdit()
         self._errbuf.setFont(QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.FixedFont))

@@ -31,10 +31,12 @@ void ngli_block_init(struct block *s, enum block_layout layout)
 {
     ngli_darray_init(&s->fields, sizeof(struct block_field), 0);
     s->layout = layout;
+    s->type = NGLI_TYPE_NONE;
 }
 
 static const int strides_map[NGLI_BLOCK_NB_LAYOUTS][NGLI_TYPE_NB] = {
     [NGLI_BLOCK_LAYOUT_STD140] = {
+        [NGLI_TYPE_BOOL]   = sizeof(int)   * 4,
         [NGLI_TYPE_INT]    = sizeof(int)   * 4,
         [NGLI_TYPE_IVEC2]  = sizeof(int)   * 4,
         [NGLI_TYPE_IVEC3]  = sizeof(int)   * 4,
@@ -50,6 +52,7 @@ static const int strides_map[NGLI_BLOCK_NB_LAYOUTS][NGLI_TYPE_NB] = {
         [NGLI_TYPE_MAT4]   = sizeof(float) * 4 * 4,
     },
     [NGLI_BLOCK_LAYOUT_STD430] = {
+        [NGLI_TYPE_BOOL]   = sizeof(int)   * 1,
         [NGLI_TYPE_INT]    = sizeof(int)   * 1,
         [NGLI_TYPE_IVEC2]  = sizeof(int)   * 2,
         [NGLI_TYPE_IVEC3]  = sizeof(int)   * 4,
@@ -67,6 +70,7 @@ static const int strides_map[NGLI_BLOCK_NB_LAYOUTS][NGLI_TYPE_NB] = {
 };
 
 static const int sizes_map[NGLI_TYPE_NB] = {
+    [NGLI_TYPE_BOOL]   = sizeof(int)   * 1,
     [NGLI_TYPE_INT]    = sizeof(int)   * 1,
     [NGLI_TYPE_IVEC2]  = sizeof(int)   * 2,
     [NGLI_TYPE_IVEC3]  = sizeof(int)   * 3,
@@ -83,6 +87,7 @@ static const int sizes_map[NGLI_TYPE_NB] = {
 };
 
 static const int aligns_map[NGLI_TYPE_NB] = {
+    [NGLI_TYPE_BOOL]   = sizeof(int)   * 1,
     [NGLI_TYPE_INT]    = sizeof(int)   * 1,
     [NGLI_TYPE_IVEC2]  = sizeof(int)   * 2,
     [NGLI_TYPE_IVEC3]  = sizeof(int)   * 4,
@@ -150,6 +155,17 @@ int ngli_block_add_field(struct block *s, const char *name, int type, int count)
     s->size = offset + field.size;
 
     return 0;
+}
+
+void ngli_block_field_copy(const struct block_field *fi, uint8_t *dst, const uint8_t *src)
+{
+    const int src_stride = sizes_map[fi->type];
+    if (fi->count == 0 || src_stride == fi->stride) {
+        memcpy(dst, src, fi->size);
+    } else {
+        for (int i = 0; i < fi->count; i++)
+            memcpy(dst + i * fi->stride, src + i * src_stride, src_stride);
+    }
 }
 
 void ngli_block_reset(struct block *s)

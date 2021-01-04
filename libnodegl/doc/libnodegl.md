@@ -172,7 +172,7 @@ Parameter | Live-chg. | Type | Description | Default
 
 Parameter | Live-chg. | Type | Description | Default
 --------- | :-------: | ---- | ----------- | :-----:
-`fields` |  | [`NodeList`](#parameter-types) ([AnimatedBufferFloat](#animatedbuffer), [AnimatedBufferVec2](#animatedbuffer), [AnimatedBufferVec3](#animatedbuffer), [AnimatedBufferVec4](#animatedbuffer), [StreamedBufferInt](#streamedbufferint), [StreamedBufferIVec2](#streamedbufferivec2), [StreamedBufferIVec3](#streamedbufferivec3), [StreamedBufferIVec4](#streamedbufferivec4), [StreamedBufferUInt](#streamedbufferuint), [StreamedBufferUIVec2](#streamedbufferuivec2), [StreamedBufferUIVec3](#streamedbufferuivec3), [StreamedBufferUIVec4](#streamedbufferuivec4), [StreamedBufferFloat](#streamedbufferfloat), [StreamedBufferVec2](#streamedbuffervec2), [StreamedBufferVec3](#streamedbuffervec3), [StreamedBufferVec4](#streamedbuffervec4), [BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec3](#buffer), [BufferVec4](#buffer), [BufferInt](#buffer), [BufferIVec2](#buffer), [BufferIVec3](#buffer), [BufferIVec4](#buffer), [BufferUInt](#buffer), [BufferUIVec2](#buffer), [BufferUIVec3](#buffer), [BufferUIVec4](#buffer), [BufferMat4](#buffer), [UniformFloat](#uniformfloat), [UniformVec2](#uniformvec2), [UniformVec3](#uniformvec3), [UniformVec4](#uniformvec4), [UniformInt](#uniformint), [UniformIVec2](#uniformivec2), [UniformIVec3](#uniformivec3), [UniformIVec4](#uniformivec4), [UniformUInt](#uniformuint), [UniformUIVec2](#uniformuivec2), [UniformUIVec3](#uniformuivec3), [UniformUIVec4](#uniformuivec4), [UniformMat4](#uniformmat4), [UniformQuat](#uniformquat), [AnimatedFloat](#animatedfloat), [AnimatedVec2](#animatedvec2), [AnimatedVec3](#animatedvec3), [AnimatedVec4](#animatedvec4), [AnimatedQuat](#animatedquat), [StreamedInt](#streamedint), [StreamedIVec2](#streamedivec2), [StreamedIVec3](#streamedivec3), [StreamedIVec4](#streamedivec4), [StreamedUInt](#streameduint), [StreamedUIVec2](#streameduivec2), [StreamedUIVec3](#streameduivec3), [StreamedUIVec4](#streameduivec4), [StreamedFloat](#streamedfloat), [StreamedVec2](#streamedvec2), [StreamedVec3](#streamedvec3), [StreamedVec4](#streamedvec4), [StreamedMat4](#streamedmat4), [Time](#time)) | block fields defined in the graphic program | 
+`fields` |  | [`NodeList`](#parameter-types) ([AnimatedBufferFloat](#animatedbuffer), [AnimatedBufferVec2](#animatedbuffer), [AnimatedBufferVec3](#animatedbuffer), [AnimatedBufferVec4](#animatedbuffer), [StreamedBufferInt](#streamedbufferint), [StreamedBufferIVec2](#streamedbufferivec2), [StreamedBufferIVec3](#streamedbufferivec3), [StreamedBufferIVec4](#streamedbufferivec4), [StreamedBufferUInt](#streamedbufferuint), [StreamedBufferUIVec2](#streamedbufferuivec2), [StreamedBufferUIVec3](#streamedbufferuivec3), [StreamedBufferUIVec4](#streamedbufferuivec4), [StreamedBufferFloat](#streamedbufferfloat), [StreamedBufferVec2](#streamedbuffervec2), [StreamedBufferVec3](#streamedbuffervec3), [StreamedBufferVec4](#streamedbuffervec4), [BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec3](#buffer), [BufferVec4](#buffer), [BufferInt](#buffer), [BufferIVec2](#buffer), [BufferIVec3](#buffer), [BufferIVec4](#buffer), [BufferUInt](#buffer), [BufferUIVec2](#buffer), [BufferUIVec3](#buffer), [BufferUIVec4](#buffer), [BufferMat4](#buffer), [UniformBool](#uniformbool), [UniformFloat](#uniformfloat), [UniformVec2](#uniformvec2), [UniformVec3](#uniformvec3), [UniformVec4](#uniformvec4), [UniformInt](#uniformint), [UniformIVec2](#uniformivec2), [UniformIVec3](#uniformivec3), [UniformIVec4](#uniformivec4), [UniformUInt](#uniformuint), [UniformUIVec2](#uniformuivec2), [UniformUIVec3](#uniformuivec3), [UniformUIVec4](#uniformuivec4), [UniformMat4](#uniformmat4), [UniformQuat](#uniformquat), [AnimatedFloat](#animatedfloat), [AnimatedVec2](#animatedvec2), [AnimatedVec3](#animatedvec3), [AnimatedVec4](#animatedvec4), [AnimatedQuat](#animatedquat), [StreamedInt](#streamedint), [StreamedIVec2](#streamedivec2), [StreamedIVec3](#streamedivec3), [StreamedIVec4](#streamedivec4), [StreamedUInt](#streameduint), [StreamedUIVec2](#streameduivec2), [StreamedUIVec3](#streameduivec3), [StreamedUIVec4](#streameduivec4), [StreamedFloat](#streamedfloat), [StreamedVec2](#streamedvec2), [StreamedVec3](#streamedvec3), [StreamedVec4](#streamedvec4), [StreamedMat4](#streamedmat4), [Time](#time)) | block fields defined in the graphic program | 
 `layout` |  | [`memory_layout`](#memory_layout-choices) | memory layout set in the graphic program | `std140`
 
 
@@ -264,7 +264,7 @@ Parameter | Live-chg. | Type | Description | Default
 `nb_group_y` |  | [`int`](#parameter-types) | number of work groups to be executed in the y dimension | `0`
 `nb_group_z` |  | [`int`](#parameter-types) | number of work groups to be executed in the z dimension | `0`
 `program` |  | [`Node`](#parameter-types) ([ComputeProgram](#computeprogram)) | compute program to be executed | 
-`resources` |  | [`NodeDict`](#parameter-types) ([Texture2D](#texture2d), [Block](#block), [UniformFloat](#uniformfloat), [UniformVec2](#uniformvec2), [UniformVec3](#uniformvec3), [UniformVec4](#uniformvec4), [UniformQuat](#uniformquat), [UniformInt](#uniformint), [UniformIVec2](#uniformivec2), [UniformIVec3](#uniformivec3), [UniformIVec4](#uniformivec4), [UniformUInt](#uniformuint), [UniformUIVec2](#uniformuivec2), [UniformUIVec3](#uniformuivec3), [UniformUIVec4](#uniformuivec4), [UniformMat4](#uniformmat4), [AnimatedFloat](#animatedfloat), [AnimatedVec2](#animatedvec2), [AnimatedVec3](#animatedvec3), [AnimatedVec4](#animatedvec4), [AnimatedQuat](#animatedquat), [StreamedInt](#streamedint), [StreamedIVec2](#streamedivec2), [StreamedIVec3](#streamedivec3), [StreamedIVec4](#streamedivec4), [StreamedUInt](#streameduint), [StreamedUIVec2](#streameduivec2), [StreamedUIVec3](#streameduivec3), [StreamedUIVec4](#streameduivec4), [StreamedFloat](#streamedfloat), [StreamedVec2](#streamedvec2), [StreamedVec3](#streamedvec3), [StreamedVec4](#streamedvec4), [StreamedMat4](#streamedmat4), [Time](#time)) | resources made accessible to the compute `program` | 
+`resources` |  | [`NodeDict`](#parameter-types) ([Texture2D](#texture2d), [Block](#block), [UniformFloat](#uniformfloat), [UniformVec2](#uniformvec2), [UniformVec3](#uniformvec3), [UniformVec4](#uniformvec4), [UniformQuat](#uniformquat), [UniformBool](#uniformbool), [UniformInt](#uniformint), [UniformIVec2](#uniformivec2), [UniformIVec3](#uniformivec3), [UniformIVec4](#uniformivec4), [UniformUInt](#uniformuint), [UniformUIVec2](#uniformuivec2), [UniformUIVec3](#uniformuivec3), [UniformUIVec4](#uniformuivec4), [UniformMat4](#uniformmat4), [AnimatedFloat](#animatedfloat), [AnimatedVec2](#animatedvec2), [AnimatedVec3](#animatedvec3), [AnimatedVec4](#animatedvec4), [AnimatedQuat](#animatedquat), [StreamedInt](#streamedint), [StreamedIVec2](#streamedivec2), [StreamedIVec3](#streamedivec3), [StreamedIVec4](#streamedivec4), [StreamedUInt](#streameduint), [StreamedUIVec2](#streameduivec2), [StreamedUIVec3](#streameduivec3), [StreamedUIVec4](#streameduivec4), [StreamedFloat](#streamedfloat), [StreamedVec2](#streamedvec2), [StreamedVec3](#streamedvec3), [StreamedVec4](#streamedvec4), [StreamedMat4](#streamedmat4), [Time](#time)) | resources made accessible to the compute `program` | 
 
 
 **Source**: [node_compute.c](/libnodegl/node_compute.c)
@@ -319,8 +319,7 @@ Parameter | Live-chg. | Type | Description | Default
 `stencil_fail` |  | [`stencil_operation`](#stencil_operation-choices) | operation to execute if stencil test fails | `unset`
 `stencil_depth_fail` |  | [`stencil_operation`](#stencil_operation-choices) | operation to execute if depth test fails | `unset`
 `stencil_depth_pass` |  | [`stencil_operation`](#stencil_operation-choices) | operation to execute if stencil and depth test pass | `unset`
-`cull_face` |  | [`bool`](#parameter-types) | enable face culling | `unset`
-`cull_face_mode` |  | [`cull_face`](#cull_face-choices) | face culling mode | `unset`
+`cull_mode` |  | [`cull_mode`](#cull_mode-choices) | face culling mode | `unset`
 `scissor_test` |  | [`bool`](#parameter-types) | enable scissor testing | `unset`
 `scissor` |  | [`vec4`](#parameter-types) | define an area where all pixels outside are discarded | (`-1`,`-1`,`-1`,`-1`)
 
@@ -338,100 +337,38 @@ Parameter | Live-chg. | Type | Description | Default
 **Source**: [node_group.c](/libnodegl/node_group.c)
 
 
-## HUD
-
-Parameter | Live-chg. | Type | Description | Default
---------- | :-------: | ---- | ----------- | :-----:
-`child` |  | [`Node`](#parameter-types) | scene to benchmark | 
-`measure_window` |  | [`int`](#parameter-types) | window size for latency measures | `60`
-`refresh_rate` |  | [`rational`](#parameter-types) | refresh data buffer every `update_rate` second | 
-`export_filename` |  | [`string`](#parameter-types) | path to export file (CSV), disable display if enabled | 
-`bg_color` |  | [`vec4`](#parameter-types) | background buffer color | (`0`,`0`,`0`,`1`)
-`aspect_ratio` |  | [`rational`](#parameter-types) | buffer aspect ratio | 
-
-
-**Source**: [node_hud.c](/libnodegl/node_hud.c)
-
-
 ## Identity
 
 **Source**: [node_identity.c](/libnodegl/node_identity.c)
 
 
-## IOInt
+## IOVar*
+
+Parameter | Live-chg. | Type | Description | Default
+--------- | :-------: | ---- | ----------- | :-----:
+`precision_out` |  | [`precision`](#precision-choices) | precision qualifier for the output side (vertex) | `auto`
+`precision_in` |  | [`precision`](#precision-choices) | precision qualifier for the input side (fragment) | `auto`
+
 
 **Source**: [node_io.c](/libnodegl/node_io.c)
 
+List of `IOVar*` nodes:
 
-## IOIVec2
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOIVec3
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOIVec4
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOUInt
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOUIvec2
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOUIvec3
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOUIvec4
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOFloat
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOVec2
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOVec3
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOVec4
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOMat3
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOMat4
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
-
-## IOBool
-
-**Source**: [node_io.c](/libnodegl/node_io.c)
-
+- `IOInt`
+- `IOIVec2`
+- `IOIVec3`
+- `IOIVec4`
+- `IOUInt`
+- `IOUIvec2`
+- `IOUIvec3`
+- `IOUIvec4`
+- `IOFloat`
+- `IOVec2`
+- `IOVec3`
+- `IOVec4`
+- `IOMat3`
+- `IOMat4`
+- `IOBool`
 
 ## Media
 
@@ -458,7 +395,7 @@ Parameter | Live-chg. | Type | Description | Default
 `vertex` |  | [`string`](#parameter-types) | vertex shader | 
 `fragment` |  | [`string`](#parameter-types) | fragment shader | 
 `properties` |  | [`NodeDict`](#parameter-types) ([ResourceProps](#resourceprops)) | resource properties | 
-`vert_out_vars` |  | [`NodeDict`](#parameter-types) ([IOInt](#ioint), [IOIVec2](#ioivec2), [IOIVec3](#ioivec3), [IOIVec4](#ioivec4), [IOUInt](#iouint), [IOUIvec2](#iouivec2), [IOUIvec3](#iouivec3), [IOUIvec4](#iouivec4), [IOFloat](#iofloat), [IOVec2](#iovec2), [IOVec3](#iovec3), [IOVec4](#iovec4), [IOMat3](#iomat3), [IOMat4](#iomat4), [IOBool](#iobool)) | in/out communication variables shared between vertex and fragment stages | 
+`vert_out_vars` |  | [`NodeDict`](#parameter-types) ([IOInt](#iovar), [IOIVec2](#iovar), [IOIVec3](#iovar), [IOIVec4](#iovar), [IOUInt](#iovar), [IOUIvec2](#iovar), [IOUIvec3](#iovar), [IOUIvec4](#iovar), [IOFloat](#iovar), [IOVec2](#iovar), [IOVec3](#iovar), [IOVec4](#iovar), [IOMat3](#iovar), [IOMat4](#iovar), [IOBool](#iovar)) | in/out communication variables shared between vertex and fragment stages | 
 `nb_frag_output` |  | [`int`](#parameter-types) | number of color outputs in the fragment shader | `0`
 
 
@@ -486,8 +423,8 @@ Parameter | Live-chg. | Type | Description | Default
 --------- | :-------: | ---- | ----------- | :-----:
 `geometry` |  | [`Node`](#parameter-types) ([Circle](#circle), [Geometry](#geometry), [Quad](#quad), [Triangle](#triangle)) | geometry to be rasterized | 
 `program` |  | [`Node`](#parameter-types) ([Program](#program)) | program to be executed | 
-`vert_resources` |  | [`NodeDict`](#parameter-types) ([Texture2D](#texture2d), [Texture3D](#texture3d), [TextureCube](#texturecube), [Block](#block), [BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec3](#buffer), [BufferVec4](#buffer), [StreamedBufferInt](#streamedbufferint), [StreamedBufferIVec2](#streamedbufferivec2), [StreamedBufferIVec3](#streamedbufferivec3), [StreamedBufferIVec4](#streamedbufferivec4), [StreamedBufferUInt](#streamedbufferuint), [StreamedBufferUIVec2](#streamedbufferuivec2), [StreamedBufferUIVec3](#streamedbufferuivec3), [StreamedBufferUIVec4](#streamedbufferuivec4), [StreamedBufferFloat](#streamedbufferfloat), [StreamedBufferVec2](#streamedbuffervec2), [StreamedBufferVec3](#streamedbuffervec3), [StreamedBufferVec4](#streamedbuffervec4), [UniformFloat](#uniformfloat), [UniformVec2](#uniformvec2), [UniformVec3](#uniformvec3), [UniformVec4](#uniformvec4), [UniformQuat](#uniformquat), [UniformInt](#uniformint), [UniformIVec2](#uniformivec2), [UniformIVec3](#uniformivec3), [UniformIVec4](#uniformivec4), [UniformUInt](#uniformuint), [UniformUIVec2](#uniformuivec2), [UniformUIVec3](#uniformuivec3), [UniformUIVec4](#uniformuivec4), [UniformMat4](#uniformmat4), [AnimatedFloat](#animatedfloat), [AnimatedVec2](#animatedvec2), [AnimatedVec3](#animatedvec3), [AnimatedVec4](#animatedvec4), [AnimatedQuat](#animatedquat), [StreamedInt](#streamedint), [StreamedIVec2](#streamedivec2), [StreamedIVec3](#streamedivec3), [StreamedIVec4](#streamedivec4), [StreamedUInt](#streameduint), [StreamedUIVec2](#streameduivec2), [StreamedUIVec3](#streameduivec3), [StreamedUIVec4](#streameduivec4), [StreamedFloat](#streamedfloat), [StreamedVec2](#streamedvec2), [StreamedVec3](#streamedvec3), [StreamedVec4](#streamedvec4), [StreamedMat4](#streamedmat4), [Time](#time)) | resources made accessible to the vertex stage of the `program` | 
-`frag_resources` |  | [`NodeDict`](#parameter-types) ([Texture2D](#texture2d), [Texture3D](#texture3d), [TextureCube](#texturecube), [Block](#block), [BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec3](#buffer), [BufferVec4](#buffer), [StreamedBufferInt](#streamedbufferint), [StreamedBufferIVec2](#streamedbufferivec2), [StreamedBufferIVec3](#streamedbufferivec3), [StreamedBufferIVec4](#streamedbufferivec4), [StreamedBufferUInt](#streamedbufferuint), [StreamedBufferUIVec2](#streamedbufferuivec2), [StreamedBufferUIVec3](#streamedbufferuivec3), [StreamedBufferUIVec4](#streamedbufferuivec4), [StreamedBufferFloat](#streamedbufferfloat), [StreamedBufferVec2](#streamedbuffervec2), [StreamedBufferVec3](#streamedbuffervec3), [StreamedBufferVec4](#streamedbuffervec4), [UniformFloat](#uniformfloat), [UniformVec2](#uniformvec2), [UniformVec3](#uniformvec3), [UniformVec4](#uniformvec4), [UniformQuat](#uniformquat), [UniformInt](#uniformint), [UniformIVec2](#uniformivec2), [UniformIVec3](#uniformivec3), [UniformIVec4](#uniformivec4), [UniformUInt](#uniformuint), [UniformUIVec2](#uniformuivec2), [UniformUIVec3](#uniformuivec3), [UniformUIVec4](#uniformuivec4), [UniformMat4](#uniformmat4), [AnimatedFloat](#animatedfloat), [AnimatedVec2](#animatedvec2), [AnimatedVec3](#animatedvec3), [AnimatedVec4](#animatedvec4), [AnimatedQuat](#animatedquat), [StreamedInt](#streamedint), [StreamedIVec2](#streamedivec2), [StreamedIVec3](#streamedivec3), [StreamedIVec4](#streamedivec4), [StreamedUInt](#streameduint), [StreamedUIVec2](#streameduivec2), [StreamedUIVec3](#streameduivec3), [StreamedUIVec4](#streameduivec4), [StreamedFloat](#streamedfloat), [StreamedVec2](#streamedvec2), [StreamedVec3](#streamedvec3), [StreamedVec4](#streamedvec4), [StreamedMat4](#streamedmat4), [Time](#time)) | resources made accessible to the fragment stage of the `program` | 
+`vert_resources` |  | [`NodeDict`](#parameter-types) ([Texture2D](#texture2d), [Texture3D](#texture3d), [TextureCube](#texturecube), [Block](#block), [BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec3](#buffer), [BufferVec4](#buffer), [StreamedBufferInt](#streamedbufferint), [StreamedBufferIVec2](#streamedbufferivec2), [StreamedBufferIVec3](#streamedbufferivec3), [StreamedBufferIVec4](#streamedbufferivec4), [StreamedBufferUInt](#streamedbufferuint), [StreamedBufferUIVec2](#streamedbufferuivec2), [StreamedBufferUIVec3](#streamedbufferuivec3), [StreamedBufferUIVec4](#streamedbufferuivec4), [StreamedBufferFloat](#streamedbufferfloat), [StreamedBufferVec2](#streamedbuffervec2), [StreamedBufferVec3](#streamedbuffervec3), [StreamedBufferVec4](#streamedbuffervec4), [UniformBool](#uniformbool), [UniformFloat](#uniformfloat), [UniformVec2](#uniformvec2), [UniformVec3](#uniformvec3), [UniformVec4](#uniformvec4), [UniformQuat](#uniformquat), [UniformInt](#uniformint), [UniformIVec2](#uniformivec2), [UniformIVec3](#uniformivec3), [UniformIVec4](#uniformivec4), [UniformUInt](#uniformuint), [UniformUIVec2](#uniformuivec2), [UniformUIVec3](#uniformuivec3), [UniformUIVec4](#uniformuivec4), [UniformMat4](#uniformmat4), [AnimatedFloat](#animatedfloat), [AnimatedVec2](#animatedvec2), [AnimatedVec3](#animatedvec3), [AnimatedVec4](#animatedvec4), [AnimatedQuat](#animatedquat), [StreamedInt](#streamedint), [StreamedIVec2](#streamedivec2), [StreamedIVec3](#streamedivec3), [StreamedIVec4](#streamedivec4), [StreamedUInt](#streameduint), [StreamedUIVec2](#streameduivec2), [StreamedUIVec3](#streameduivec3), [StreamedUIVec4](#streameduivec4), [StreamedFloat](#streamedfloat), [StreamedVec2](#streamedvec2), [StreamedVec3](#streamedvec3), [StreamedVec4](#streamedvec4), [StreamedMat4](#streamedmat4), [Time](#time)) | resources made accessible to the vertex stage of the `program` | 
+`frag_resources` |  | [`NodeDict`](#parameter-types) ([Texture2D](#texture2d), [Texture3D](#texture3d), [TextureCube](#texturecube), [Block](#block), [BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec3](#buffer), [BufferVec4](#buffer), [StreamedBufferInt](#streamedbufferint), [StreamedBufferIVec2](#streamedbufferivec2), [StreamedBufferIVec3](#streamedbufferivec3), [StreamedBufferIVec4](#streamedbufferivec4), [StreamedBufferUInt](#streamedbufferuint), [StreamedBufferUIVec2](#streamedbufferuivec2), [StreamedBufferUIVec3](#streamedbufferuivec3), [StreamedBufferUIVec4](#streamedbufferuivec4), [StreamedBufferFloat](#streamedbufferfloat), [StreamedBufferVec2](#streamedbuffervec2), [StreamedBufferVec3](#streamedbuffervec3), [StreamedBufferVec4](#streamedbuffervec4), [UniformBool](#uniformbool), [UniformFloat](#uniformfloat), [UniformVec2](#uniformvec2), [UniformVec3](#uniformvec3), [UniformVec4](#uniformvec4), [UniformQuat](#uniformquat), [UniformInt](#uniformint), [UniformIVec2](#uniformivec2), [UniformIVec3](#uniformivec3), [UniformIVec4](#uniformivec4), [UniformUInt](#uniformuint), [UniformUIVec2](#uniformuivec2), [UniformUIVec3](#uniformuivec3), [UniformUIVec4](#uniformuivec4), [UniformMat4](#uniformmat4), [AnimatedFloat](#animatedfloat), [AnimatedVec2](#animatedvec2), [AnimatedVec3](#animatedvec3), [AnimatedVec4](#animatedvec4), [AnimatedQuat](#animatedquat), [StreamedInt](#streamedint), [StreamedIVec2](#streamedivec2), [StreamedIVec3](#streamedivec3), [StreamedIVec4](#streamedivec4), [StreamedUInt](#streameduint), [StreamedUIVec2](#streameduivec2), [StreamedUIVec3](#streameduivec3), [StreamedUIVec4](#streameduivec4), [StreamedFloat](#streamedfloat), [StreamedVec2](#streamedvec2), [StreamedVec3](#streamedvec3), [StreamedVec4](#streamedvec4), [StreamedMat4](#streamedmat4), [Time](#time)) | resources made accessible to the fragment stage of the `program` | 
 `attributes` |  | [`NodeDict`](#parameter-types) ([BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec3](#buffer), [BufferVec4](#buffer), [BufferMat4](#buffer)) | extra vertex attributes made accessible to the `program` | 
 `instance_attributes` |  | [`NodeDict`](#parameter-types) ([BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec3](#buffer), [BufferVec4](#buffer), [BufferMat4](#buffer)) | per instance extra vertex attributes made accessible to the `program` | 
 `nb_instances` |  | [`int`](#parameter-types) | number of instances to draw | `1`
@@ -504,9 +441,8 @@ Parameter | Live-chg. | Type | Description | Default
 `color_textures` |  | [`NodeList`](#parameter-types) ([Texture2D](#texture2d), [TextureCube](#texturecube)) | destination color texture | 
 `depth_texture` |  | [`Node`](#parameter-types) ([Texture2D](#texture2d)) | destination depth (and potentially combined stencil) texture | 
 `samples` |  | [`int`](#parameter-types) | number of samples used for multisampling anti-aliasing | `0`
-`clear_color` |  | [`vec4`](#parameter-types) | color used to clear the `color_texture` | (`-1`,`-1`,`-1`,`-1`)
+`clear_color` |  | [`vec4`](#parameter-types) | color used to clear the `color_texture` | (`0`,`0`,`0`,`0`)
 `features` |  | [`framebuffer_features`](#framebuffer_features-choices) | framebuffer feature mask | `0`
-`vflip` |  | [`bool`](#parameter-types) | apply a vertical flip to `color_texture` and `depth_texture` transformation matrices to match the `node.gl` uv coordinates system | `1`
 
 
 **Source**: [node_rtt.c](/libnodegl/node_rtt.c)
@@ -569,9 +505,9 @@ Parameter | Live-chg. | Type | Description | Default
 
 Parameter | Live-chg. | Type | Description | Default
 --------- | :-------: | ---- | ----------- | :-----:
-`text` |  | [`string`](#parameter-types) | text string to rasterize | 
-`fg_color` |  | [`vec4`](#parameter-types) | foreground text color | (`1`,`1`,`1`,`1`)
-`bg_color` |  | [`vec4`](#parameter-types) | background text color | (`0`,`0`,`0`,`0.8`)
+`text` | ✓ | [`string`](#parameter-types) | text string to rasterize | 
+`fg_color` | ✓ | [`vec4`](#parameter-types) | foreground text color | (`1`,`1`,`1`,`1`)
+`bg_color` | ✓ | [`vec4`](#parameter-types) | background text color | (`0`,`0`,`0`,`0.8`)
 `box_corner` |  | [`vec3`](#parameter-types) | origin coordinates of `box_width` and `box_height` vectors | (`-1`,`-1`,`0`)
 `box_width` |  | [`vec3`](#parameter-types) | box width vector | (`2`,`0`,`0`)
 `box_height` |  | [`vec3`](#parameter-types) | box height vector | (`0`,`2`,`0`)
@@ -579,10 +515,7 @@ Parameter | Live-chg. | Type | Description | Default
 `font_scale` |  | [`double`](#parameter-types) | scaling of the font | `1`
 `valign` |  | [`valign`](#valign-choices) | vertical alignment of the text in the box | `center`
 `halign` |  | [`halign`](#halign-choices) | horizontal alignment of the text in the box | `center`
-`aspect_ratio` |  | [`rational`](#parameter-types) | box aspect ratio | 
-`min_filter` |  | [`filter`](#filter-choices) | rasterized text texture minifying function | `linear`
-`mag_filter` |  | [`filter`](#filter-choices) | rasterized text texture magnification function | `nearest`
-`mipmap_filter` |  | [`mipmap_filter`](#mipmap_filter-choices) | rasterized text texture minifying mipmap function | `linear`
+`aspect_ratio` | ✓ | [`rational`](#parameter-types) | box aspect ratio | 
 
 
 **Source**: [node_text.c](/libnodegl/node_text.c)
@@ -600,7 +533,6 @@ Parameter | Live-chg. | Type | Description | Default
 `mipmap_filter` |  | [`mipmap_filter`](#mipmap_filter-choices) | texture minifying mipmap function | `none`
 `wrap_s` |  | [`wrap`](#wrap-choices) | wrap parameter for the texture on the s dimension (horizontal) | `clamp_to_edge`
 `wrap_t` |  | [`wrap`](#wrap-choices) | wrap parameter for the texture on the t dimension (vertical) | `clamp_to_edge`
-`access` |  | [`access`](#access-choices) | texture access (only honored by the `Compute` node) | `read+write`
 `data_src` |  | [`Node`](#parameter-types) ([Media](#media), [AnimatedBufferFloat](#animatedbuffer), [AnimatedBufferVec2](#animatedbuffer), [AnimatedBufferVec4](#animatedbuffer), [BufferByte](#buffer), [BufferBVec2](#buffer), [BufferBVec4](#buffer), [BufferInt](#buffer), [BufferIVec2](#buffer), [BufferIVec4](#buffer), [BufferShort](#buffer), [BufferSVec2](#buffer), [BufferSVec4](#buffer), [BufferUByte](#buffer), [BufferUBVec2](#buffer), [BufferUBVec4](#buffer), [BufferUInt](#buffer), [BufferUIVec2](#buffer), [BufferUIVec4](#buffer), [BufferUShort](#buffer), [BufferUSVec2](#buffer), [BufferUSVec4](#buffer), [BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec4](#buffer)) | data source | 
 `direct_rendering` |  | [`bool`](#parameter-types) | whether direct rendering is allowed or not for media playback | `1`
 
@@ -622,7 +554,6 @@ Parameter | Live-chg. | Type | Description | Default
 `wrap_s` |  | [`wrap`](#wrap-choices) | wrap parameter for the texture on the s dimension (horizontal) | `clamp_to_edge`
 `wrap_t` |  | [`wrap`](#wrap-choices) | wrap parameter for the texture on the t dimension (vertical) | `clamp_to_edge`
 `wrap_r` |  | [`wrap`](#wrap-choices) | wrap parameter for the texture on the r dimension (depth) | `clamp_to_edge`
-`access` |  | [`access`](#access-choices) | texture access (only honored by the `Compute` node) | `read+write`
 `data_src` |  | [`Node`](#parameter-types) ([AnimatedBufferFloat](#animatedbuffer), [AnimatedBufferVec2](#animatedbuffer), [AnimatedBufferVec4](#animatedbuffer), [BufferByte](#buffer), [BufferBVec2](#buffer), [BufferBVec4](#buffer), [BufferInt](#buffer), [BufferIVec2](#buffer), [BufferIVec4](#buffer), [BufferShort](#buffer), [BufferSVec2](#buffer), [BufferSVec4](#buffer), [BufferUByte](#buffer), [BufferUBVec2](#buffer), [BufferUBVec4](#buffer), [BufferUInt](#buffer), [BufferUIVec2](#buffer), [BufferUIVec4](#buffer), [BufferUShort](#buffer), [BufferUSVec2](#buffer), [BufferUSVec4](#buffer), [BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec4](#buffer)) | data source | 
 
 
@@ -641,7 +572,6 @@ Parameter | Live-chg. | Type | Description | Default
 `wrap_s` |  | [`wrap`](#wrap-choices) | wrap parameter for the texture on the s dimension (horizontal) | `clamp_to_edge`
 `wrap_t` |  | [`wrap`](#wrap-choices) | wrap parameter for the texture on the t dimension (vertical) | `clamp_to_edge`
 `wrap_r` |  | [`wrap`](#wrap-choices) | wrap parameter for the texture on the r dimension (depth) | `clamp_to_edge`
-`access` |  | [`access`](#access-choices) | texture access (only honored by the `Compute` node) | `read+write`
 `data_src` |  | [`Node`](#parameter-types) ([AnimatedBufferFloat](#animatedbuffer), [AnimatedBufferVec2](#animatedbuffer), [AnimatedBufferVec4](#animatedbuffer), [BufferByte](#buffer), [BufferBVec2](#buffer), [BufferBVec4](#buffer), [BufferInt](#buffer), [BufferIVec2](#buffer), [BufferIVec4](#buffer), [BufferShort](#buffer), [BufferSVec2](#buffer), [BufferSVec4](#buffer), [BufferUByte](#buffer), [BufferUBVec2](#buffer), [BufferUBVec4](#buffer), [BufferUInt](#buffer), [BufferUIVec2](#buffer), [BufferUIVec4](#buffer), [BufferUShort](#buffer), [BufferUSVec2](#buffer), [BufferUSVec4](#buffer), [BufferFloat](#buffer), [BufferVec2](#buffer), [BufferVec4](#buffer)) | data source | 
 
 
@@ -1086,6 +1016,16 @@ Parameter | Live-chg. | Type | Description | Default
 **Source**: [node_streamedbuffer.c](/libnodegl/node_streamedbuffer.c)
 
 
+## UniformBool
+
+Parameter | Live-chg. | Type | Description | Default
+--------- | :-------: | ---- | ----------- | :-----:
+`value` | ✓ | [`bool`](#parameter-types) | value exposed to the shader | `0`
+
+
+**Source**: [node_uniform.c](/libnodegl/node_uniform.c)
+
+
 ## UniformInt
 
 Parameter | Live-chg. | Type | Description | Default
@@ -1332,7 +1272,6 @@ Constant | Description
 `line_strip` | line strip
 `line_list` | line list
 `triangle_strip` | triangle strip
-`triangle_fan` | triangle fan
 `triangle_list` | triangle list
 
 ## blend_factor choices
@@ -1399,12 +1338,23 @@ Constant | Description
 `decr_wrap` | decrements the current stencil buffer value and wraps it
 `decr_invert` | bitwise inverts the current stencil buffer value
 
-## cull_face choices
+## cull_mode choices
 
 Constant | Description
 -------- | -----------
+`unset` | unset
+`none` | no facets are discarded
 `front` | cull front-facing facets
 `back` | cull back-facing facets
+
+## precision choices
+
+Constant | Description
+-------- | -----------
+`auto` | automatic
+`high` | high
+`medium` | medium
+`low` | low
 
 ## sxplayer_log_level choices
 
@@ -1422,16 +1372,6 @@ Constant | Description
 -------- | -----------
 `depth` | add depth buffer
 `stencil` | add stencil buffer
-`no_clear` | not cleared between draws (non-deterministic)
-
-## precision choices
-
-Constant | Description
--------- | -----------
-`auto` | automatic
-`high` | high
-`medium` | medium
-`low` | low
 
 ## valign choices
 
@@ -1448,21 +1388,6 @@ Constant | Description
 `center` | horizontally centered
 `right` | right positioned
 `left` | left positioned
-
-## filter choices
-
-Constant | Description
--------- | -----------
-`nearest` | nearest filtering
-`linear` | linear filtering
-
-## mipmap_filter choices
-
-Constant | Description
--------- | -----------
-`none` | no mipmap generation
-`nearest` | nearest filtering
-`linear` | linear filtering
 
 ## format choices
 
@@ -1519,6 +1444,21 @@ Constant | Description
 `auto_depth` | select automatically the preferred depth format
 `auto_depth_stencil` | select automatically the preferred depth + stencil format
 
+## filter choices
+
+Constant | Description
+-------- | -----------
+`nearest` | nearest filtering
+`linear` | linear filtering
+
+## mipmap_filter choices
+
+Constant | Description
+-------- | -----------
+`none` | no mipmap generation
+`nearest` | nearest filtering
+`linear` | linear filtering
+
 ## wrap choices
 
 Constant | Description
@@ -1526,10 +1466,3 @@ Constant | Description
 `clamp_to_edge` | clamp to edge wrapping
 `mirrored_repeat` | mirrored repeat wrapping
 `repeat` | repeat pattern wrapping
-
-## access choices
-
-Constant | Description
--------- | -----------
-`read` | read
-`write` | write

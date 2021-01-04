@@ -22,11 +22,10 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
 
 #include "gctx.h"
 #include "hmap.h"
-#include "limits.h"
+#include "limit.h"
 #include "log.h"
 #include "nodegl.h"
 #include "nodes.h"
@@ -53,6 +52,7 @@ struct compute_priv {
                                           NGL_NODE_UNIFORMVEC3,     \
                                           NGL_NODE_UNIFORMVEC4,     \
                                           NGL_NODE_UNIFORMQUAT,     \
+                                          NGL_NODE_UNIFORMBOOL,     \
                                           NGL_NODE_UNIFORMINT,      \
                                           NGL_NODE_UNIFORMIVEC2,    \
                                           NGL_NODE_UNIFORMIVEC3,    \

@@ -25,7 +25,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#if defined(_WIN32) && defined(_MSC_VER)
+#define STDOUT_FILENO _fileno(stdout)
+#define STDERR_FILENO _fileno(stderr)
+#else
 #include <unistd.h>
+#endif
 
 #include <nodegl.h>
 
@@ -33,45 +38,16 @@
 #include "opts.h"
 #include "wsi.h"
 
-#define BUF_SIZE 1024
-
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
 
 static struct ngl_node *get_scene(const char *filename)
 {
-    struct ngl_node *scene = NULL;
-    char *buf = NULL;
-
-    int fd = filename ? open(filename, O_RDONLY) : STDIN_FILENO;
-    if (fd == -1) {
-        fprintf(stderr, "unable to open %s\n", filename);
-        goto end;
-    }
-
-    ssize_t pos = 0;
-    for (;;) {
-        const ssize_t needed = pos + BUF_SIZE + 1;
-        void *new_buf = realloc(buf, needed);
-        if (!new_buf)
-            goto end;
-        buf = new_buf;
-        const ssize_t n = read(fd, buf + pos, BUF_SIZE);
-        if (n < 0)
-            goto end;
-        if (n == 0) {
-            buf[pos] = 0;
-            break;
-        }
-        pos += n;
-    }
-
-    scene = ngl_node_deserialize(buf);
-
-end:
-    if (fd != -1 && fd != STDIN_FILENO)
-        close(fd);
+    char *buf = get_text_file_content(filename);
+    if (!buf)
+        return NULL;
+    struct ngl_node *scene = ngl_node_deserialize(buf);
     free(buf);
     return scene;
 }
@@ -241,7 +217,7 @@ int main(int argc, char *argv[])
         const float t0 = r->start;
         const float t1 = r->start + r->duration;
 
-        const int64_t start = gettime();
+        const int64_t start = gettime_relative();
 
         for (;;) {
             const float t = t0 + k*1./r->freq;
@@ -266,7 +242,7 @@ int main(int argc, char *argv[])
             k++;
         }
 
-        const double tdiff = (gettime() - start) / 1000000.;
+        const double tdiff = (gettime_relative() - start) / 1000000.;
         printf("Rendered %d frames in %g (FPS=%g)\n", k, tdiff, k / tdiff);
     }
 

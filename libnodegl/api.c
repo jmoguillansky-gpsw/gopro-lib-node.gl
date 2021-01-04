@@ -22,6 +22,10 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "config.h"
 
 #if defined(TARGET_ANDROID)
 #include <jni.h>
@@ -31,16 +35,22 @@
 
 #include "darray.h"
 #include "gctx.h"
+#include "graphicstate.h"
 #include "log.h"
 #include "math_utils.h"
 #include "memory.h"
 #include "nodegl.h"
 #include "nodes.h"
+#include "pgcache.h"
 #include "rnode.h"
+
+#if defined(HAVE_VAAPI)
+#include "vaapi.h"
+#endif
 
 #if defined(TARGET_DARWIN) || defined(TARGET_IPHONE)
 #if defined(BACKEND_GL)
-#include "gctx_gl.h"
+#include "backends/gl/gctx_gl.h"
 #endif
 #endif
 
@@ -60,11 +70,27 @@ static int get_default_platform(void)
     return NGL_PLATFORM_MACOS;
 #elif defined(TARGET_ANDROID)
     return NGL_PLATFORM_ANDROID;
-#elif defined(TARGET_MINGW_W64)
+#elif defined(TARGET_WINDOWS)
     return NGL_PLATFORM_WINDOWS;
 #else
     return NGL_ERROR_UNSUPPORTED;
 #endif
+}
+
+static int cmd_stop(struct ngl_ctx *s, void *arg)
+{
+#if defined(HAVE_VAAPI)
+    ngli_vaapi_reset(s);
+#endif
+#if defined(TARGET_ANDROID)
+    ngli_android_ctx_reset(&s->android_ctx);
+#endif
+    ngli_texture_freep(&s->font_atlas); // allocated by the first node text
+    ngli_pgcache_reset(&s->pgcache);
+    ngli_hud_freep(&s->hud);
+    ngli_gctx_freep(&s->gctx);
+
+    return 0;
 }
 
 static int cmd_configure(struct ngl_ctx *s, void *arg)
@@ -75,7 +101,7 @@ static int cmd_configure(struct ngl_ctx *s, void *arg)
         ngli_node_detach_ctx(s->scene, s);
     ngli_rnode_clear(&s->rnode);
 
-    ngli_gctx_freep(&s->gctx);
+    cmd_stop(s, arg);
 
     if (config->backend == NGL_BACKEND_AUTO)
         config->backend = DEFAULT_BACKEND;
@@ -89,25 +115,61 @@ static int cmd_configure(struct ngl_ctx *s, void *arg)
 
     s->config = *config;
 
-    s->gctx = ngli_gctx_create(s);
+    s->gctx = ngli_gctx_create(config);
     if (!s->gctx)
         return NGL_ERROR_MEMORY;
 
     int ret = ngli_gctx_init(s->gctx);
     if (ret < 0) {
         LOG(ERROR, "unable to initialize gpu context");
-        ngli_gctx_freep(&s->gctx);
+        cmd_stop(s, arg);
         return ret;
     }
+
+    s->rnode_pos->graphicstate = NGLI_GRAPHICSTATE_DEFAULTS;
+    s->rnode_pos->rendertarget_desc = *ngli_gctx_get_default_rendertarget_desc(s->gctx);
+
+    ret = ngli_pgcache_init(&s->pgcache, s->gctx);
+    if (ret < 0)
+        return ret;
+
+#if defined(HAVE_VAAPI)
+    ret = ngli_vaapi_init(s);
+    if (ret < 0)
+        LOG(WARNING, "could not initialize vaapi");
+#endif
+
+#if defined(TARGET_ANDROID)
+    struct android_ctx *android_ctx = &s->android_ctx;
+    ret = ngli_android_ctx_init(s->gctx, android_ctx);
+    if (ret < 0)
+        LOG(WARNING, "could not initialize Android context");
+#endif
+
+    NGLI_ALIGNED_MAT(matrix) = NGLI_MAT4_IDENTITY;
+    ngli_gctx_transform_projection_matrix(s->gctx, matrix);
+    ngli_darray_clear(&s->projection_matrix_stack);
+    if (!ngli_darray_push(&s->projection_matrix_stack, matrix))
+        return NGL_ERROR_MEMORY;
 
     if (s->scene) {
         ret = ngli_node_attach_ctx(s->scene, s);
         if (ret < 0) {
             ngli_node_detach_ctx(s->scene, s);
             ngl_node_unrefp(&s->scene);
-            ngli_gctx_freep(&s->gctx);
+            cmd_stop(s, arg);
             return ret;
         }
+    }
+
+    if (config->hud) {
+        s->hud = ngli_hud_create(s);
+        if (!s->hud)
+            return NGL_ERROR_MEMORY;
+
+        ret = ngli_hud_init(s->hud);
+        if (ret < 0)
+            return ret;
     }
 
     return 0;
@@ -125,6 +187,26 @@ static int cmd_resize(struct ngl_ctx *s, void *arg)
     return ngli_gctx_resize(s->gctx, params->width, params->height, params->viewport);
 }
 
+static int cmd_set_capture_buffer(struct ngl_ctx *s, void *capture_buffer)
+{
+    struct ngl_config *config = &s->config;
+
+    int ret = ngli_gctx_set_capture_buffer(s->gctx, capture_buffer);
+    if (ret < 0) {
+        if (s->scene) {
+            ngli_node_detach_ctx(s->scene, s);
+            ngl_node_unrefp(&s->scene);
+        }
+        cmd_stop(s, NULL);
+        config->capture_buffer = NULL;
+        return ret;
+    }
+
+    config->capture_buffer = capture_buffer;
+
+    return 0;
+}
+
 static int cmd_set_scene(struct ngl_ctx *s, void *arg)
 {
     if (s->scene) {
@@ -132,6 +214,9 @@ static int cmd_set_scene(struct ngl_ctx *s, void *arg)
         ngl_node_unrefp(&s->scene);
     }
     ngli_rnode_clear(&s->rnode);
+
+    s->rnode_pos->graphicstate = NGLI_GRAPHICSTATE_DEFAULTS;
+    s->rnode_pos->rendertarget_desc = *ngli_gctx_get_default_rendertarget_desc(s->gctx);
 
     struct ngl_node *scene = arg;
     if (!scene)
@@ -144,6 +229,20 @@ static int cmd_set_scene(struct ngl_ctx *s, void *arg)
     }
 
     s->scene = ngl_node_ref(scene);
+
+    const struct ngl_config *config = &s->config;
+    if (config->hud) {
+        ngli_hud_freep(&s->hud);
+
+        s->hud = ngli_hud_create(s);
+        if (!s->hud)
+            return NGL_ERROR_MEMORY;
+
+        ret = ngli_hud_init(s->hud);
+        if (ret < 0)
+            return ret;
+    }
+
     return 0;
 }
 
@@ -158,7 +257,9 @@ static int cmd_prepare_draw(struct ngl_ctx *s, void *arg)
 
     LOG(DEBUG, "prepare scene %s @ t=%f", scene->label, t);
 
-    s->activitycheck_nodes.count = 0;
+    const int64_t start_time = s->hud ? ngli_gettime_relative() : 0;
+
+    ngli_darray_clear(&s->activitycheck_nodes);
     int ret = ngli_node_visit(scene, 1, t);
     if (ret < 0)
         return ret;
@@ -171,6 +272,8 @@ static int cmd_prepare_draw(struct ngl_ctx *s, void *arg)
     if (ret < 0)
         return ret;
 
+    s->cpu_update_time = s->hud ? ngli_gettime_relative() - start_time : 0;
+
     return 0;
 }
 
@@ -182,14 +285,43 @@ static int cmd_draw(struct ngl_ctx *s, void *arg)
     if (ret < 0)
         return ret;
 
-    return ngli_gctx_draw(s->gctx, t);
-}
+    ret = ngli_gctx_begin_draw(s->gctx, t);
+    if (ret < 0)
+        goto end;
 
-static int cmd_stop(struct ngl_ctx *s, void *arg)
-{
-    ngli_gctx_freep(&s->gctx);
+    const int64_t cpu_start_time = s->hud ? ngli_gettime_relative() : 0;
 
-    return 0;
+    struct rendertarget *rt = ngli_gctx_get_default_rendertarget(s->gctx);
+    s->available_rendertargets[0] = rt;
+    s->available_rendertargets[1] = rt;
+    s->current_rendertarget = rt;
+    s->begin_render_pass = 0;
+
+    struct ngl_node *scene = s->scene;
+    if (scene) {
+        LOG(DEBUG, "draw scene %s @ t=%f", scene->label, t);
+        ngli_node_draw(scene);
+    }
+
+    if (s->hud) {
+        s->cpu_draw_time = ngli_gettime_relative() - cpu_start_time;
+
+        if (!s->begin_render_pass) {
+            ngli_gctx_end_render_pass(s->gctx);
+            s->current_rendertarget = s->available_rendertargets[1];
+            s->begin_render_pass = 1;
+        }
+        ngli_gctx_query_draw_time(s->gctx, &s->gpu_draw_time);
+
+        ngli_hud_draw(s->hud);
+    }
+
+end:;
+    int end_ret = ngli_gctx_end_draw(s->gctx, t);
+    if (end_ret < 0)
+        return end_ret;
+
+    return ret;
 }
 
 static int dispatch_cmd(struct ngl_ctx *s, cmd_func_type cmd_func, void *arg)
@@ -278,6 +410,154 @@ static void stop_thread(struct ngl_ctx *s)
     pthread_cond_destroy(&s->cond_ctl);
     pthread_cond_destroy(&s->cond_wkr);
     pthread_mutex_destroy(&s->lock);
+}
+
+static const char *get_cap_string_id(unsigned cap_id)
+{
+    switch (cap_id) {
+    case NGL_CAP_BLOCK:                         return "block";
+    case NGL_CAP_COMPUTE:                       return "compute";
+    case NGL_CAP_INSTANCED_DRAW:                return "instanced_draw";
+    case NGL_CAP_MAX_COLOR_ATTACHMENTS:         return "max_color_attachments";
+    case NGL_CAP_MAX_COMPUTE_GROUP_COUNT_X:     return "max_compute_group_count_x";
+    case NGL_CAP_MAX_COMPUTE_GROUP_COUNT_Y:     return "max_compute_group_count_y";
+    case NGL_CAP_MAX_COMPUTE_GROUP_COUNT_Z:     return "max_compute_group_count_z";
+    case NGL_CAP_MAX_COMPUTE_GROUP_INVOCATIONS: return "max_compute_group_invocations";
+    case NGL_CAP_MAX_COMPUTE_GROUP_SIZE_X:      return "max_compute_group_size_x";
+    case NGL_CAP_MAX_COMPUTE_GROUP_SIZE_Y:      return "max_compute_group_size_y";
+    case NGL_CAP_MAX_COMPUTE_GROUP_SIZE_Z:      return "max_compute_group_size_z";
+    case NGL_CAP_MAX_SAMPLES:                   return "max_samples";
+    case NGL_CAP_NPOT_TEXTURE:                  return "npot_texture";
+    case NGL_CAP_SHADER_TEXTURE_LOD:            return "shader_texture_lod";
+    case NGL_CAP_TEXTURE_3D:                    return "texture_3d";
+    case NGL_CAP_TEXTURE_CUBE:                  return "texture_cube";
+    case NGL_CAP_UINT_UNIFORMS:                 return "uint_uniforms";
+    }
+    ngli_assert(0);
+}
+
+#define CAP(cap_id, value) {cap_id, get_cap_string_id(cap_id), value}
+#define ALL_FEATURES(features, mask) ((features & (mask)) == mask)
+#define ANY_FEATURES(features, mask) ((features & (mask)) != 0)
+
+static int load_caps(struct ngl_backend *backend, const struct gctx *gctx)
+{
+    const int has_block          = ANY_FEATURES(gctx->features, NGLI_FEATURE_BUFFER_OBJECTS_ALL);
+    const int has_compute        = ALL_FEATURES(gctx->features, NGLI_FEATURE_COMPUTE_SHADER_ALL);
+    const int has_instanced_draw = ALL_FEATURES(gctx->features, NGLI_FEATURE_INSTANCED_ARRAY);
+    const int has_npot_texture   = ALL_FEATURES(gctx->features, NGLI_FEATURE_TEXTURE_NPOT);
+    const int has_shader_texture_lod = ALL_FEATURES(gctx->features, NGLI_FEATURE_SHADER_TEXTURE_LOD);
+    const int has_texture_3d     = ALL_FEATURES(gctx->features, NGLI_FEATURE_TEXTURE_3D);
+    const int has_texture_cube   = ALL_FEATURES(gctx->features, NGLI_FEATURE_TEXTURE_CUBE_MAP);
+    const int has_uint_uniforms  = ALL_FEATURES(gctx->features, NGLI_FEATURE_UINT_UNIFORMS);
+
+    const struct limits *limits = &gctx->limits;
+    const struct ngl_cap caps[] = {
+        CAP(NGL_CAP_BLOCK,                         has_block),
+        CAP(NGL_CAP_COMPUTE,                       has_compute),
+        CAP(NGL_CAP_INSTANCED_DRAW,                has_instanced_draw),
+        CAP(NGL_CAP_MAX_COLOR_ATTACHMENTS,         limits->max_color_attachments),
+        CAP(NGL_CAP_MAX_COMPUTE_GROUP_COUNT_X,     limits->max_compute_work_group_counts[0]),
+        CAP(NGL_CAP_MAX_COMPUTE_GROUP_COUNT_Y,     limits->max_compute_work_group_counts[1]),
+        CAP(NGL_CAP_MAX_COMPUTE_GROUP_COUNT_Z,     limits->max_compute_work_group_counts[2]),
+        CAP(NGL_CAP_MAX_COMPUTE_GROUP_INVOCATIONS, limits->max_compute_work_group_invocations),
+        CAP(NGL_CAP_MAX_COMPUTE_GROUP_SIZE_X,      limits->max_compute_work_group_sizes[0]),
+        CAP(NGL_CAP_MAX_COMPUTE_GROUP_SIZE_Y,      limits->max_compute_work_group_sizes[1]),
+        CAP(NGL_CAP_MAX_COMPUTE_GROUP_SIZE_Z,      limits->max_compute_work_group_sizes[2]),
+        CAP(NGL_CAP_MAX_SAMPLES,                   limits->max_samples),
+        CAP(NGL_CAP_NPOT_TEXTURE,                  has_npot_texture),
+        CAP(NGL_CAP_SHADER_TEXTURE_LOD,            has_shader_texture_lod),
+        CAP(NGL_CAP_TEXTURE_3D,                    has_texture_3d),
+        CAP(NGL_CAP_TEXTURE_CUBE,                  has_texture_cube),
+        CAP(NGL_CAP_UINT_UNIFORMS,                 has_uint_uniforms),
+    };
+
+    backend->nb_caps = NGLI_ARRAY_NB(caps);
+    backend->caps = ngli_calloc(backend->nb_caps, sizeof(*backend->caps));
+    if (!backend->caps)
+        return NGL_ERROR_MEMORY;
+    memcpy(backend->caps, caps, sizeof(caps));
+
+    return 0;
+}
+
+static int backend_probe(struct ngl_backend *backend, const struct ngl_config *config)
+{
+    struct gctx *gctx = ngli_gctx_create(config);
+    if (!gctx)
+        return NGL_ERROR_MEMORY;
+
+    int ret = ngli_gctx_init(gctx);
+    if (ret < 0)
+        goto end;
+
+    backend->id         = config->backend;
+    backend->string_id  = gctx->backend_str;
+    backend->name       = gctx->class->name;
+
+    ret = load_caps(backend, gctx);
+    if (ret < 0)
+        goto end;
+
+end:
+    ngli_gctx_freep(&gctx);
+    return ret;
+}
+
+static const int backend_ids[] = {
+#ifdef BACKEND_GL
+    NGL_BACKEND_OPENGL,
+    NGL_BACKEND_OPENGLES,
+#endif
+};
+
+int ngl_backends_probe(const struct ngl_config *user_config, int *nb_backendsp, struct ngl_backend **backendsp)
+{
+    static const struct ngl_config default_config = {
+        .width     = 1,
+        .height    = 1,
+        .offscreen = 1,
+    };
+
+    if (!user_config)
+        user_config = &default_config;
+
+    const int platform = user_config->platform == NGL_PLATFORM_AUTO ? get_default_platform() : user_config->platform;
+
+    struct ngl_backend *backends = ngli_calloc(NGLI_ARRAY_NB(backend_ids), sizeof(*backends));
+    if (!backends)
+        return NGL_ERROR_MEMORY;
+    int nb_backends = 0;
+
+    for (int i = 0; i < NGLI_ARRAY_NB(backend_ids); i++) {
+        if (user_config->backend != NGL_BACKEND_AUTO && user_config->backend != backend_ids[i])
+            continue;
+        struct ngl_config config = *user_config;
+        config.backend = backend_ids[i];
+        config.platform = platform;
+
+        int ret = backend_probe(&backends[nb_backends], &config);
+        if (ret < 0)
+            continue;
+        backends[nb_backends].is_default = backend_ids[i] == DEFAULT_BACKEND;
+
+        nb_backends++;
+    }
+
+    if (!nb_backends)
+        ngl_backends_freep(&backends);
+
+    *backendsp = backends;
+    *nb_backendsp = nb_backends;
+    return 0;
+}
+
+void ngl_backends_freep(struct ngl_backend **backendsp)
+{
+    struct ngl_backend *backends = *backendsp;
+    for (int i = 0; i < NGLI_ARRAY_NB(backend_ids); i++)
+        ngli_free(backends[i].caps);
+    ngli_freep(backendsp);
 }
 
 struct ngl_ctx *ngl_create(void)
@@ -378,6 +658,27 @@ int ngl_resize(struct ngl_ctx *s, int width, int height, const int *viewport)
 #else
     return dispatch_cmd(s, cmd_resize, &params);
 #endif
+}
+
+int ngl_set_capture_buffer(struct ngl_ctx *s, void *capture_buffer)
+{
+    if (!s->configured) {
+        LOG(ERROR, "context must be configured before setting a capture buffer");
+        return NGL_ERROR_INVALID_USAGE;
+    }
+
+    const struct ngl_config *config = &s->config;
+    if (!config->offscreen) {
+        LOG(ERROR, "capture buffers are only supported with offscreen rendering");
+        return NGL_ERROR_INVALID_USAGE;
+    }
+
+    int ret = dispatch_cmd(s, cmd_set_capture_buffer, capture_buffer);
+    if (ret < 0) {
+        s->configured = 0;
+        return ret;
+    }
+    return ret;
 }
 
 int ngl_set_scene(struct ngl_ctx *s, struct ngl_node *scene)

@@ -23,7 +23,9 @@
 import array
 import pynodegl as ngl
 from pynodegl_utils.misc import scene
+from pynodegl_utils.tests.cmp_cuepoints import test_cuepoints
 from pynodegl_utils.tests.cmp_fingerprint import test_fingerprint
+from pynodegl_utils.toolbox.colors import COLORS
 
 
 def _get_cube():
@@ -93,7 +95,16 @@ void main()
 '''
 
 
-def _get_rtt_scene(cfg, features='depth', texture_ds_format=None, samples=0, mipmap_filter='none'):
+_RENDER_DEPTH = '''
+void main()
+{
+    float depth = ngl_texvideo(tex0, var_tex0_coord).r;
+    ngl_out_color = vec4(depth, depth, depth, 1.0);
+}
+'''
+
+
+def _get_rtt_scene(cfg, features='depth', texture_ds_format=None, samples=0, mipmap_filter='none', sample_depth=False):
     cfg.duration = 10
     cfg.aspect_ratio = (1, 1)
     cube = _get_cube()
@@ -137,14 +148,21 @@ def _get_rtt_scene(cfg, features='depth', texture_ds_format=None, samples=0, mip
         [texture],
         features=features,
         depth_texture=texture_depth,
-        samples=samples
+        samples=samples,
+        clear_color=(0, 0, 0, 1),
     )
 
     quad = ngl.Quad((-1, -1, 0), (2, 0, 0), (0, 2, 0))
-    program = ngl.Program(vertex=cfg.get_vert('texture'), fragment=cfg.get_frag('texture'))
-    program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
-    render = ngl.Render(quad, program)
-    render.update_frag_resources(tex0=texture)
+    if sample_depth:
+        program = ngl.Program(vertex=cfg.get_vert('texture'), fragment=_RENDER_DEPTH)
+        program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
+        render = ngl.Render(quad, program)
+        render.update_frag_resources(tex0=texture_depth)
+    else:
+        program = ngl.Program(vertex=cfg.get_vert('texture'), fragment=cfg.get_frag('texture'))
+        program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
+        render = ngl.Render(quad, program)
+        render.update_frag_resources(tex0=texture)
     return ngl.Group(children=(rtt, render))
 
 
@@ -162,6 +180,7 @@ _rtt_tests = dict(
     feature_depth_msaa=dict(features='depth', samples=4),
     feature_depth_stencil_msaa=dict(features='depth+stencil', samples=4),
     mipmap=dict(features='depth', mipmap_filter='linear'),
+    sample_depth=dict(texture_ds_format='auto_depth', sample_depth=True),
     texture_depth=dict(texture_ds_format='auto_depth'),
     texture_depth_stencil=dict(texture_ds_format='auto_depth_stencil'),
     texture_depth_msaa=dict(texture_ds_format='auto_depth', samples=4),
@@ -171,3 +190,72 @@ _rtt_tests = dict(
 
 for name, params in _rtt_tests.items():
     globals()['rtt_' + name] = _get_rtt_function(**params)
+
+
+@test_cuepoints(width=32, height=32, points={'bottom-left': (-0.5, -0.5), 'top-right': (0.5, 0.5)}, tolerance=1)
+@scene()
+def rtt_load_attachment(cfg):
+    quad = ngl.Quad((-1, -1, 0), (2, 0, 0), (0, 2, 0))
+    program = ngl.Program(vertex=cfg.get_vert('color'), fragment=cfg.get_frag('color'))
+    program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
+    background = ngl.Render(quad, program)
+    background.update_frag_resources(color=ngl.UniformVec4(value=COLORS['white']))
+
+    program = ngl.Program(vertex=cfg.get_vert('color'), fragment=cfg.get_frag('color'))
+    program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
+    render = ngl.Render(quad, program)
+    render.update_frag_resources(color=ngl.UniformVec4(value=COLORS['orange']))
+
+    texture = ngl.Texture2D(width=16, height=16)
+    rtt = ngl.RenderToTexture(render, [texture])
+
+    quad = ngl.Quad((0, 0, 0), (1, 0, 0), (0, 1, 0))
+    program = ngl.Program(vertex=cfg.get_vert('texture'), fragment=cfg.get_frag('texture'))
+    program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
+    foreground = ngl.Render(quad, program)
+    foreground.update_frag_resources(tex0=texture)
+
+    return ngl.Group(children=(background, rtt, foreground))
+
+
+@test_fingerprint(width=512, height=512, nb_keyframes=10)
+@scene()
+def rtt_clear_attachment_with_timeranges(cfg):
+    cfg.aspect_ratio = (1, 1)
+
+    # Time-disabled full screen white quad
+    quad = ngl.Quad((-1, -1, 0), (2, 0, 0), (0, 2, 0))
+    program = ngl.Program(vertex=cfg.get_vert('color'), fragment=cfg.get_frag('color'))
+    program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
+    render = ngl.Render(quad, program)
+    render.update_frag_resources(color=ngl.UniformVec4(value=COLORS['white']))
+    time_range_filter = ngl.TimeRangeFilter(render)
+    time_range_filter.add_ranges(ngl.TimeRangeModeNoop(0))
+
+    # Intermediate no-op RTT to force the use of a different render pass internally
+    texture = ngl.Texture2D(width=32, height=32)
+    rtt_noop = ngl.RenderToTexture(ngl.Identity(), [texture])
+
+    # Centered rotating quad
+    quad = ngl.Quad((-0.5, -0.5, 0), (1, 0, 0), (0, 1, 0))
+    program = ngl.Program(vertex=cfg.get_vert('color'), fragment=cfg.get_frag('color'))
+    program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
+    render = ngl.Render(quad, program)
+    render.update_frag_resources(color=ngl.UniformVec4(value=COLORS['orange']))
+    animkf = [ngl.AnimKeyFrameFloat(0, 0), ngl.AnimKeyFrameFloat(cfg.duration, -360)]
+    render = ngl.Rotate(render, anim=ngl.AnimatedFloat(animkf))
+
+    group = ngl.Group(children=(time_range_filter, rtt_noop, render))
+
+    # Root RTT
+    texture = ngl.Texture2D(width=512, height=512)
+    rtt = ngl.RenderToTexture(group, [texture])
+
+    # Full screen render of the root RTT result
+    quad = ngl.Quad((-1, -1, 0), (2, 0, 0), (0, 2, 0))
+    program = ngl.Program(vertex=cfg.get_vert('texture'), fragment=cfg.get_frag('texture'))
+    program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
+    render = ngl.Render(quad, program)
+    render.update_frag_resources(tex0=texture)
+
+    return ngl.Group(children=(rtt, render))

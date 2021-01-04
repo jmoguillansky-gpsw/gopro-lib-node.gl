@@ -22,12 +22,12 @@
 #ifndef GCTX_H
 #define GCTX_H
 
+#include <stdint.h>
+
 #include "buffer.h"
-#include "features.h"
-#include "gtimer.h"
-#include "limits.h"
+#include "feature.h"
+#include "limit.h"
 #include "nodegl.h"
-#include "pgcache.h"
 #include "pipeline.h"
 #include "rendertarget.h"
 #include "texture.h"
@@ -35,24 +35,29 @@
 struct gctx_class {
     const char *name;
 
-    struct gctx *(*create)(struct ngl_ctx *ctx);
+    struct gctx *(*create)(const struct ngl_config *config);
     int (*init)(struct gctx *s);
     int (*resize)(struct gctx *s, int width, int height, const int *viewport);
-    int (*pre_draw)(struct gctx *s, double t);
-    int (*post_draw)(struct gctx *s, double t);
+    int (*set_capture_buffer)(struct gctx *s, void *capture_buffer);
+    int (*begin_draw)(struct gctx *s, double t);
+    int (*end_draw)(struct gctx *s, double t);
+    int (*query_draw_time)(struct gctx *s, int64_t *time);
     void (*destroy)(struct gctx *s);
 
-    void (*set_rendertarget)(struct gctx *s, struct rendertarget *rt);
-    struct rendertarget *(*get_rendertarget)(struct gctx *s);
+    int (*transform_cull_mode)(struct gctx *s, int cull_mode);
+    void (*transform_projection_matrix)(struct gctx *s, float *dst);
+    void (*get_rendertarget_uvcoord_matrix)(struct gctx *s, float *dst);
+
+    struct rendertarget *(*get_default_rendertarget)(struct gctx *s);
+    const struct rendertarget_desc *(*get_default_rendertarget_desc)(struct gctx *s);
+
+    void (*begin_render_pass)(struct gctx *s, struct rendertarget *rt);
+    void (*end_render_pass)(struct gctx *s);
+
     void (*set_viewport)(struct gctx *s, const int *viewport);
     void (*get_viewport)(struct gctx *s, int *viewport);
     void (*set_scissor)(struct gctx *s, const int *scissor);
     void (*get_scissor)(struct gctx *s, int *scissor);
-    void (*set_clear_color)(struct gctx *s, const float *color);
-    void (*get_clear_color)(struct gctx *s, float *color);
-    void (*clear_color)(struct gctx *s);
-    void (*clear_depth_stencil)(struct gctx *s);
-    void (*invalidate_depth_stencil)(struct gctx *s);
     int (*get_preferred_depth_format)(struct gctx *s);
     int (*get_preferred_depth_stencil_format)(struct gctx *s);
 
@@ -61,18 +66,13 @@ struct gctx_class {
     int (*buffer_upload)(struct buffer *s, const void *data, int size);
     void (*buffer_freep)(struct buffer **sp);
 
-    struct gtimer *(*gtimer_create)(struct gctx *ctx);
-    int (*gtimer_init)(struct gtimer *s);
-    int (*gtimer_start)(struct gtimer *s);
-    int (*gtimer_stop)(struct gtimer *s);
-    int64_t (*gtimer_read)(struct gtimer *s);
-    void (*gtimer_freep)(struct gtimer **sp);
-
     struct pipeline *(*pipeline_create)(struct gctx *ctx);
     int (*pipeline_init)(struct pipeline *s, const struct pipeline_params *params);
+    int (*pipeline_set_resources)(struct pipeline *s, const struct pipeline_resource_params *data_params);
     int (*pipeline_update_attribute)(struct pipeline *s, int index, struct buffer *buffer);
     int (*pipeline_update_uniform)(struct pipeline *s, int index, const void *value);
     int (*pipeline_update_texture)(struct pipeline *s, int index, struct texture *texture);
+    int (*pipeline_update_buffer)(struct pipeline *s, int index, struct buffer *buffer);
     void (*pipeline_draw)(struct pipeline *s, int nb_vertices, int nb_instances);
     void (*pipeline_draw_indexed)(struct pipeline *s, struct buffer *indices, int indices_format, int nb_indices, int nb_instances);
     void (*pipeline_dispatch)(struct pipeline *s, int nb_group_x, int nb_group_y, int nb_group_z);
@@ -84,12 +84,10 @@ struct gctx_class {
 
     struct rendertarget *(*rendertarget_create)(struct gctx *ctx);
     int (*rendertarget_init)(struct rendertarget *s, const struct rendertarget_params *params);
-    void (*rendertarget_blit)(struct rendertarget *s, struct rendertarget *dst, int vflip);
-    void (*rendertarget_resolve)(struct rendertarget *s);
     void (*rendertarget_read_pixels)(struct rendertarget *s, uint8_t *data);
     void (*rendertarget_freep)(struct rendertarget **sp);
 
-    struct texture *(*texture_create)(struct gctx* ctx);
+    struct texture *(*texture_create)(struct gctx *ctx);
     int (*texture_init)(struct texture *s, const struct texture_params *params);
     int (*texture_has_mipmap)(const struct texture *s);
     int (*texture_match_dimensions)(const struct texture *s, int width, int height, int depth);
@@ -99,34 +97,38 @@ struct gctx_class {
 };
 
 struct gctx {
-    struct ngl_ctx *ctx;
+    struct ngl_config config;
+    const char *backend_str;
     const struct gctx_class *class;
     int version;
-    int features;
+    int language_version;
+    uint64_t features;
     struct limits limits;
-    struct pgcache pgcache;
 };
 
-struct gctx *ngli_gctx_create(struct ngl_ctx *ctx);
+struct gctx *ngli_gctx_create(const struct ngl_config *config);
 int ngli_gctx_init(struct gctx *s);
 int ngli_gctx_resize(struct gctx *s, int width, int height, const int *viewport);
-int ngli_gctx_draw(struct gctx *s, double t);
+int ngli_gctx_set_capture_buffer(struct gctx *s, void *capture_buffer);
+int ngli_gctx_begin_draw(struct gctx *s, double t);
+int ngli_gctx_query_draw_time(struct gctx *s, int64_t *time);
+int ngli_gctx_end_draw(struct gctx *s, double t);
 void ngli_gctx_freep(struct gctx **sp);
 
-void ngli_gctx_set_rendertarget(struct gctx *s, struct rendertarget *rt);
-struct rendertarget *ngli_gctx_get_rendertarget(struct gctx *s);
+int ngli_gctx_transform_cull_mode(struct gctx *s, int cull_mode);
+void ngli_gctx_transform_projection_matrix(struct gctx *s, float *dst);
+void ngli_gctx_get_rendertarget_uvcoord_matrix(struct gctx *s, float *dst);
+
+struct rendertarget *ngli_gctx_get_default_rendertarget(struct gctx *s);
+const struct rendertarget_desc *ngli_gctx_get_default_rendertarget_desc(struct gctx *s);
+
+void ngli_gctx_begin_render_pass(struct gctx *s, struct rendertarget *rt);
+void ngli_gctx_end_render_pass(struct gctx *s);
 
 void ngli_gctx_set_viewport(struct gctx *s, const int *viewport);
 void ngli_gctx_get_viewport(struct gctx *s, int *viewport);
 void ngli_gctx_set_scissor(struct gctx *s, const int *scissor);
 void ngli_gctx_get_scissor(struct gctx *s, int *scissor);
-
-void ngli_gctx_set_clear_color(struct gctx *s, const float *color);
-void ngli_gctx_get_clear_color(struct gctx *s, float *color);
-
-void ngli_gctx_clear_color(struct gctx *s);
-void ngli_gctx_clear_depth_stencil(struct gctx *s);
-void ngli_gctx_invalidate_depth_stencil(struct gctx *s);
 
 int ngli_gctx_get_preferred_depth_format(struct gctx *s);
 int ngli_gctx_get_preferred_depth_stencil_format(struct gctx *s);

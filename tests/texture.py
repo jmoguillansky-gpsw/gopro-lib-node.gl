@@ -31,12 +31,21 @@ from pynodegl_utils.toolbox.colors import COLORS
 from pynodegl_utils.toolbox.colors import get_random_color_buffer
 
 
+_RENDER_BUFFER_FRAG = '''
+void main()
+{
+    float color = ngl_tex2d(tex0, var_tex0_coord).r;
+    ngl_out_color = vec4(color, 0.0, 0.0, 1.0);
+}
+'''
+
+
 def _render_buffer(cfg, w, h):
     n = w * h
     data = array.array('B', [i * 255 // n for i in range(n)])
     buf = ngl.BufferUByte(data=data)
     texture = ngl.Texture2D(width=w, height=h, data_src=buf)
-    program = ngl.Program(vertex=cfg.get_vert('texture'), fragment=cfg.get_frag('texture'))
+    program = ngl.Program(vertex=cfg.get_vert('texture'), fragment=_RENDER_BUFFER_FRAG)
     program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
     render = ngl.Render(ngl.Quad(), program)
     render.update_frag_resources(tex0=texture)
@@ -204,7 +213,7 @@ def texture_scissor(cfg):
     render.update_frag_resources(color=color)
     graphic_config = ngl.GraphicConfig(render, scissor_test=True, scissor=(32, 32, 32, 32))
     texture = ngl.Texture2D(width=64, height=64)
-    rtt = ngl.RenderToTexture(graphic_config, [texture])
+    rtt = ngl.RenderToTexture(graphic_config, [texture], clear_color=(0, 0, 0, 1))
 
     program = ngl.Program(vertex=cfg.get_vert('texture'), fragment=cfg.get_frag('texture'))
     program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
@@ -269,7 +278,7 @@ void main()
 _RENDER_TEXTURE_LOD_FRAG = '''
 void main()
 {
-    ngl_out_color = textureLod(tex0, var_uvcoord, 0.5);
+    ngl_out_color = ngl_tex2dlod(tex0, var_uvcoord, 0.5);
 }
 '''
 

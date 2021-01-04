@@ -30,13 +30,15 @@ import time
 from PySide2 import QtCore
 
 
-class HooksCaller:
+class _HooksCaller:
 
     _HOOKS = ('get_session_info', 'get_sessions', 'scene_change', 'sync_file')
 
     def __init__(self, hooksdir):
         self._hooksdir = hooksdir
         self.hooks_available = all(self._get_hook(h) is not None for h in self._HOOKS)
+        if not self.hooks_available:
+            print(f'hooks not available in {hooksdir}')
 
     def _get_hook(self, name):
         if not self._hooksdir:
@@ -113,6 +115,47 @@ class HooksCaller:
         return self._get_hook_output('sync_file', session_id, localfile, self._hash_filename(localfile))
 
 
+class HooksCaller:
+
+    def __init__(self, hooksdirs):
+        self._callers = [_HooksCaller(hooksdir) for hooksdir in hooksdirs]
+        self.hooks_available = any(c.hooks_available for c in self._callers)
+
+    def _get_caller_session_id(self, unique_session_id):
+        istr, session_id = unique_session_id.split(':', maxsplit=1)
+        return self._callers[int(istr)], session_id
+
+    def get_sessions(self):
+        '''
+        Session IDs may be identical accross hook systems. A pathological case
+        is with several instances of the same hook system, but it could
+        happen in other situations as well since hook systems don't know each
+        others and may pick common identifiers), so we need to make them
+        unique.
+
+        This methods makes these session IDs unique by adding the index of
+        the caller as prefix.
+        '''
+        sessions = []
+        for caller_id, caller in enumerate(self._callers):
+            caller_sessions = caller.get_sessions()
+            for (session_id, desc, backend, system) in caller_sessions:
+                sessions.append((f'{caller_id}:{session_id}', desc, backend, system))
+        return sessions
+
+    def get_session_info(self, session_id):
+        caller, session_id = self._get_caller_session_id(session_id)
+        return caller.get_session_info(session_id)
+
+    def scene_change(self, session_id, local_scene, cfg):
+        caller, session_id = self._get_caller_session_id(session_id)
+        return caller.scene_change(session_id, local_scene, cfg)
+
+    def sync_file(self, session_id, localfile):
+        caller, session_id = self._get_caller_session_id(session_id)
+        return caller.sync_file(session_id, localfile)
+
+
 class _HooksThread(QtCore.QThread):
 
     uploadingFile = QtCore.Signal(str, int, int, str)
@@ -175,16 +218,18 @@ class _HooksThread(QtCore.QThread):
 
             # The serialized scene is then stored in a file which is then
             # communicated with additional parameters to the user
-            local_scene = op.join(tempfile.gettempdir(), 'ngl_scene.ngl')
-            with open(local_scene, 'w') as f:
+            # FIXME: this won't work on Windows, see
+            # https://docs.python.org/3/library/tempfile.html#tempfile.NamedTemporaryFile
+            with tempfile.NamedTemporaryFile('w', prefix='ngl_scene_', suffix='.ngl', delete=True) as f:
                 f.write(serialized_scene)
-            self.sendingScene.emit(session_id, self._scene_id)
-            try:
-                self._hooks_caller.scene_change(session_id, local_scene, cfg)
-            except subprocess.CalledProcessError as e:
-                self.error.emit(session_id, 'Error (%d) while sending scene' % e.returncode)
-                return
-            self.done.emit(session_id, self._scene_id, time.time() - start_time)
+                f.flush()
+                self.sendingScene.emit(session_id, self._scene_id)
+                try:
+                    self._hooks_caller.scene_change(session_id, f.name, cfg)
+                except subprocess.CalledProcessError as e:
+                    self.error.emit(session_id, 'Error (%d) while sending scene' % e.returncode)
+                    return
+                self.done.emit(session_id, self._scene_id, time.time() - start_time)
 
         except Exception as e:
             self.error.emit(session_id, 'Error: %s' % str(e))

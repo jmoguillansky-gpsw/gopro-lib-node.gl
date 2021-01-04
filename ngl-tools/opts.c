@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
 
 #include <nodegl.h>
 
@@ -77,6 +76,7 @@ static int opt_loglevel(const char *arg, void *dst)
         {"info",    NGL_LOG_INFO},
         {"warning", NGL_LOG_WARNING},
         {"error",   NGL_LOG_ERROR},
+        {"quiet",   NGL_LOG_QUIET},
     };
     const int lvl = s2i(loglevel_map, ARRAY_NB(loglevel_map), arg);
     if (lvl < 0) {
@@ -87,14 +87,25 @@ static int opt_loglevel(const char *arg, void *dst)
     return 0;
 }
 
+static int get_backend(const char *id)
+{
+    if (!strcmp(id, "auto"))
+        return NGL_BACKEND_AUTO;
+
+    int nb_backends;
+    struct ngl_backend *backends;
+    int ret = ngl_backends_probe(NULL, &nb_backends, &backends);
+    if (ret < 0)
+        return ret;
+    for (int i = 0; i < nb_backends; i++)
+        if (!strcmp(backends[i].string_id, id))
+            return backends[i].id;
+    return NGL_ERROR_NOT_FOUND;
+}
+
 static int opt_backend(const char *arg, void *dst)
 {
-    static const struct s2i backend_map[] = {
-        {"auto",     NGL_BACKEND_AUTO},
-        {"opengl",   NGL_BACKEND_OPENGL},
-        {"opengles", NGL_BACKEND_OPENGLES},
-    };
-    const int backend = s2i(backend_map, ARRAY_NB(backend_map), arg);
+    const int backend = get_backend(arg);
     if (backend < 0) {
         fprintf(stderr, "invalid backend \"%s\"\n", arg);
         return backend;

@@ -27,13 +27,24 @@
 
 #define NGLI_MAX_COLOR_ATTACHMENTS 8
 
+enum {
+    NGLI_LOAD_OP_LOAD,
+    NGLI_LOAD_OP_CLEAR,
+    NGLI_LOAD_OP_DONT_CARE,
+};
+
+enum {
+    NGLI_STORE_OP_STORE,
+    NGLI_STORE_OP_DONT_CARE,
+};
+
 struct attachment_desc {
     int format;
-    int samples;
     int resolve;
 };
 
 struct rendertarget_desc {
+    int samples;
     int nb_colors;
     struct attachment_desc colors[NGLI_MAX_COLOR_ATTACHMENTS];
     struct attachment_desc depth_stencil;
@@ -44,6 +55,9 @@ struct attachment {
     int attachment_layer;
     struct texture *resolve_target;
     int resolve_target_layer;
+    int load_op;
+    float clear_value[4];
+    int store_op;
 };
 
 struct rendertarget_params {
@@ -59,14 +73,10 @@ struct rendertarget {
     struct rendertarget_params params;
     int width;
     int height;
-    int nb_color_attachments;
-    int nb_resolve_color_attachments;
 };
 
 struct rendertarget *ngli_rendertarget_create(struct gctx *gctx);
 int ngli_rendertarget_init(struct rendertarget *s, const struct rendertarget_params *params);
-void ngli_rendertarget_blit(struct rendertarget *s, struct rendertarget *dst, int vflip);
-void ngli_rendertarget_resolve(struct rendertarget *s);
 void ngli_rendertarget_read_pixels(struct rendertarget *s, uint8_t *data);
 void ngli_rendertarget_freep(struct rendertarget **sp);
 

@@ -23,8 +23,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
+#include "gctx.h"
 #include "log.h"
 #include "nodegl.h"
 #include "nodes.h"
@@ -113,7 +113,7 @@ static int camera_init(struct ngl_node *node)
         return NGL_ERROR_INVALID_ARG;
     }
 
-    static const float zvec[4] = {0};
+    static const float zvec[4];
     s->use_perspective = memcmp(s->perspective, zvec, sizeof(s->perspective));
     s->use_orthographic = memcmp(s->orthographic, zvec, sizeof(s->orthographic));
 
@@ -195,6 +195,9 @@ static int camera_update(struct ngl_node *node, double t)
     } else {
         ngli_mat4_identity(s->projection_matrix);
     }
+
+    struct gctx *gctx = ctx->gctx;
+    ngli_gctx_transform_projection_matrix(gctx, s->projection_matrix);
 
     return ngli_node_update(child, t);
 }

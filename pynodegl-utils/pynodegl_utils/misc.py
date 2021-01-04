@@ -19,6 +19,7 @@
 # under the License.
 #
 
+import os
 import os.path as op
 import tempfile
 import platform
@@ -27,10 +28,10 @@ import inspect
 import json
 import subprocess
 import pynodegl as ngl
-from pynodegl_utils import controls
+from collections import namedtuple
 
 
-def scene(**widgets_specs):
+def scene(**controls):
     def real_decorator(scene_func):
         def func_wrapper(idict=None, **extra_args):
             if idict is None:
@@ -45,20 +46,25 @@ def scene(**widgets_specs):
 
         final_specs = []
 
-        # Construct a arg -> default dict
+        # Construct widgets specs
+        widgets_specs = []
         func_specs = inspect.getfullargspec(scene_func)
         if func_specs.defaults:
             nb_optionnals = len(func_specs.defaults)
             for i, key in enumerate(func_specs.args[-nb_optionnals:]):
                 # Set controller defaults according to the function prototype
-                if key in widgets_specs:
-                    widgets_specs[key].set_default(func_specs.defaults[i])
+                control = controls.get(key)
+                if control is not None:
+                    default = func_specs.defaults[i]
+                    ctl_id = control.__class__.__name__
+                    ctl_data = control._asdict()
+                    widgets_specs.append((key, default, ctl_id, ctl_data))
 
-        # Transfers the widgets controls to the UI.
+        # Transfers the widget specs to the UI.
         # We could use the return value but it's better if the user can still
         # call its decorated scene function transparently inside his own code
         # without getting garbage along the return value.
-        func_wrapper.widgets_specs = list(widgets_specs.items())
+        func_wrapper.widgets_specs = widgets_specs
 
         # Flag the scene as a scene function so it's registered in the UI.
         func_wrapper.iam_a_ngl_scene_func = True
@@ -71,13 +77,13 @@ def scene(**widgets_specs):
     return real_decorator
 
 
-scene.Range = controls.Range
-scene.Vector = controls.Vector
-scene.Color = controls.Color
-scene.Bool = controls.Bool
-scene.File = controls.File
-scene.List = controls.List
-scene.Text = controls.Text
+scene.Range = namedtuple('Range',  'range unit_base', defaults=([0, 1], 1))
+scene.Vector = namedtuple('Vector', 'n minv maxv', defaults=(None, None))
+scene.Color = namedtuple('Color',  '')
+scene.Bool = namedtuple('Bool', '')
+scene.File = namedtuple('File', 'filter', defaults=('',))
+scene.List = namedtuple('List', 'choices')
+scene.Text = namedtuple('Text', '')
 
 
 class Media:
@@ -127,14 +133,23 @@ class Media:
         return self._framerate[0] / float(self._framerate[1])
 
 
+def get_nodegl_tempdir():
+    tmpdir = op.join(tempfile.gettempdir(), 'nodegl')
+    try:
+        os.makedirs(tmpdir)
+    except FileExistsError:
+        pass
+    return tmpdir
+
+
 class SceneCfg:
 
-    _DEFAULT_MEDIA_FILE = op.join(tempfile.gettempdir(), 'ngl-media.mp4')
+    _DEFAULT_MEDIA_FILE = op.join(get_nodegl_tempdir(), 'ngl-media.mp4')
     _DEFAULT_FIELDS = {
         'aspect_ratio': (16, 9),
         'duration': 30.0,
         'framerate': (60, 1),
-        'backend': 'gl',
+        'backend': 'opengl',
         'samples': 0,
         'system': platform.system(),
         'files': [],
@@ -198,7 +213,7 @@ def get_viewport(width, height, aspect_ratio):
 
 def get_backend(backend):
     backend_map = {
-        'gl': ngl.BACKEND_OPENGL,
-        'gles': ngl.BACKEND_OPENGLES,
+        'opengl': ngl.BACKEND_OPENGL,
+        'opengles': ngl.BACKEND_OPENGLES,
     }
     return backend_map[backend]

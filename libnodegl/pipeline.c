@@ -33,6 +33,11 @@ int ngli_pipeline_init(struct pipeline *s, const struct pipeline_params *params)
     return s->gctx->class->pipeline_init(s, params);
 }
 
+int ngli_pipeline_set_resources(struct pipeline *s, const struct pipeline_resource_params *data_params)
+{
+    return s->gctx->class->pipeline_set_resources(s, data_params);
+}
+
 int ngli_pipeline_update_attribute(struct pipeline *s, int index, struct buffer *buffer)
 {
     return s->gctx->class->pipeline_update_attribute(s, index, buffer);
@@ -46,6 +51,11 @@ int ngli_pipeline_update_uniform(struct pipeline *s, int index, const void *valu
 int ngli_pipeline_update_texture(struct pipeline *s, int index, struct texture *texture)
 {
     return s->gctx->class->pipeline_update_texture(s, index, texture);
+}
+
+int ngli_pipeline_update_buffer(struct pipeline *s, int index, struct buffer *buffer)
+{
+    return s->gctx->class->pipeline_update_buffer(s, index, buffer);
 }
 
 void ngli_pipeline_draw(struct pipeline *s, int nb_vertices, int nb_instances)

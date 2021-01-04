@@ -21,13 +21,11 @@
 #
 
 import os.path as op
-import tempfile
 import subprocess
 from PySide2 import QtCore, QtGui, QtWidgets, QtSvg
 
 from .seekbar import Seekbar
 
-from pynodegl_utils import player
 from pynodegl_utils import misc
 
 import pynodegl as ngl
@@ -49,6 +47,34 @@ class _SVGGraphView(QtWidgets.QGraphicsView):
         self.setTransform(m)
 
 
+class _Clock:
+
+    TIMEBASE = 1000000000  # nanoseconds
+
+    def __init__(self, framerate, duration):
+        self._playback_index = 0
+        self.configure(framerate, duration)
+
+    def configure(self, framerate, duration):
+        self._framerate = framerate
+        self._duration = duration * self.TIMEBASE
+
+    def get_playback_time_info(self):
+        playback_time = self._playback_index * self._framerate[1] / float(self._framerate[0])
+        return (self._playback_index, playback_time)
+
+    def set_playback_time(self, time):
+        self._playback_index = int(round(
+            time * self._framerate[0] / self._framerate[1]
+        ))
+
+    def step_playback_index(self, step):
+        max_duration_index = int(round(
+            self._duration * self._framerate[0] / float(self._framerate[1] * self.TIMEBASE)
+        ))
+        self._playback_index = min(max(self._playback_index + step, 0), max_duration_index)
+
+
 class GraphView(QtWidgets.QWidget):
 
     def __init__(self, get_scene_func, config):
@@ -58,7 +84,7 @@ class GraphView(QtWidgets.QWidget):
         self._framerate = config.get('framerate')
         self._duration = 0.0
         self._samples = config.get('samples')
-        self._viewer = None
+        self._ctx = None
 
         self._save_btn = QtWidgets.QPushButton('Save image')
 
@@ -67,7 +93,7 @@ class GraphView(QtWidgets.QWidget):
         self._view.setScene(self._scene)
 
         self._seek_chkbox = QtWidgets.QCheckBox('Show graph at a given time')
-        self._seekbar = Seekbar(config, stop_button=False)
+        self._seekbar = Seekbar(config)
         self._seekbar.setEnabled(False)
 
         hbox = QtWidgets.QHBoxLayout()
@@ -83,27 +109,10 @@ class GraphView(QtWidgets.QWidget):
         self._save_btn.clicked.connect(self._save_to_file)
         self._seek_chkbox.stateChanged.connect(self._seek_check_changed)
 
-        self._seekbar.play.connect(self._play)
-        self._seekbar.pause.connect(self._pause)
         self._seekbar.seek.connect(self._seek)
         self._seekbar.step.connect(self._step)
 
-        self._timer = QtCore.QTimer()
-        self._timer.timeout.connect(self._update)
-
-        self._clock = player.Clock(self._framerate, 0.0)
-
-    @QtCore.Slot()
-    def _play(self):
-        self._timer.start()
-        self._clock.start()
-        self._seekbar.set_play_state()
-
-    @QtCore.Slot()
-    def _pause(self):
-        self._timer.stop()
-        self._clock.stop()
-        self._seekbar.set_pause_state()
+        self._clock = _Clock(self._framerate, 0.0)
 
     @QtCore.Slot(float)
     def _seek(self, time):
@@ -113,15 +122,14 @@ class GraphView(QtWidgets.QWidget):
     @QtCore.Slot(int)
     def _step(self, step):
         self._clock.step_playback_index(step)
-        self._pause()
         self._update()
 
     @QtCore.Slot()
     def _update(self):
-        if not self._viewer:
+        if not self._ctx:
             return
         frame_index, frame_time = self._clock.get_playback_time_info()
-        dot_scene = self._viewer.dot(frame_time)
+        dot_scene = self._ctx.dot(frame_time)
         if dot_scene:
             self._update_graph(dot_scene)
             self._seekbar.set_frame_time(frame_index, frame_time)
@@ -151,32 +159,28 @@ class GraphView(QtWidgets.QWidget):
         self._seekbar.set_scene_metadata(cfg)
 
         if self._seek_chkbox.isChecked():
-            self._init_viewer(cfg['backend'])
+            self._init_ctx(cfg['backend'])
             self._framerate = cfg['framerate']
             self._duration = cfg['duration']
-            self._viewer.set_scene_from_string(cfg['scene'])
+            self._ctx.set_scene_from_string(cfg['scene'])
             self._clock.configure(self._framerate, self._duration)
-            self._timer.setInterval(self._framerate[1] * 1000 / self._framerate[0])  # in milliseconds
             self._update()
         else:
-            self._reset_viewer()
+            self._reset_ctx()
             dot_scene = cfg['scene']
             self._update_graph(dot_scene)
 
-    def leave(self):
-        self._pause()
-
-    def _reset_viewer(self):
-        if not self._viewer:
+    def _reset_ctx(self):
+        if not self._ctx:
             return
-        del self._viewer
-        self._viewer = None
+        del self._ctx
+        self._ctx = None
 
-    def _init_viewer(self, rendering_backend):
-        if self._viewer:
+    def _init_ctx(self, rendering_backend):
+        if self._ctx:
             return
-        self._viewer = ngl.Context()
-        self._viewer.configure(
+        self._ctx = ngl.Context()
+        self._ctx.configure(
             backend=misc.get_backend(rendering_backend),
             offscreen=1,
             width=16,
@@ -184,7 +188,7 @@ class GraphView(QtWidgets.QWidget):
         )
 
     def _update_graph(self, dot_scene):
-        basename = op.join(tempfile.gettempdir(), 'ngl_scene.')
+        basename = op.join(misc.get_nodegl_tempdir(), 'ngl_scene.')
         dotfile = basename + 'dot'
         svgfile = basename + 'svg'
         with open(dotfile, 'w') as f:

@@ -26,6 +26,8 @@
 #include <sxplayer.h>
 #include <pthread.h>
 
+#include "config.h"
+
 #if defined(HAVE_VAAPI_X11)
 #include <X11/Xlib.h>
 #endif
@@ -39,8 +41,10 @@
 #endif
 
 #if defined(TARGET_ANDROID)
+#include "android_ctx.h"
 #include "android_handlerthread.h"
 #include "android_surface.h"
+#include "android_imagereader.h"
 #endif
 
 #if defined(TARGET_IPHONE)
@@ -52,6 +56,7 @@
 #include "drawutils.h"
 #include "graphicstate.h"
 #include "hmap.h"
+#include "hud.h"
 #include "hwconv.h"
 #include "hwupload.h"
 #include "image.h"
@@ -79,13 +84,16 @@ struct ngl_ctx {
     struct gctx *gctx;
     struct rnode rnode;
     struct rnode *rnode_pos;
-    struct graphicstate graphicstate;
-    struct rendertarget_desc *rendertarget_desc;
     struct ngl_node *scene;
     struct ngl_config config;
+    struct rendertarget *available_rendertargets[2];
+    struct rendertarget *current_rendertarget;
+    int begin_render_pass;
     struct darray modelview_matrix_stack;
     struct darray projection_matrix_stack;
     struct darray activitycheck_nodes;
+    struct texture *font_atlas;
+    struct pgcache pgcache;
 #if defined(HAVE_VAAPI_X11)
     Display *x11_display;
 #endif
@@ -96,6 +104,13 @@ struct ngl_ctx {
     VADisplay va_display;
     int va_version;
 #endif
+#if defined(TARGET_ANDROID)
+    struct android_ctx android_ctx;
+#endif
+    struct hud *hud;
+    int64_t cpu_update_time;
+    int64_t cpu_draw_time;
+    int64_t gpu_draw_time;
 
     /* Shared fields */
     pthread_mutex_t lock;
@@ -190,7 +205,7 @@ struct buffer_priv {
     int timebase[2];
     struct ngl_node *time_anim;
 
-    int fd;
+    FILE *fp;
     int dynamic;
     int data_type;          // any of NGLI_TYPE_*
     int last_index;
@@ -203,14 +218,6 @@ struct buffer_priv {
 int ngli_node_buffer_ref(struct ngl_node *node);
 void ngli_node_buffer_unref(struct ngl_node *node);
 int ngli_node_buffer_upload(struct ngl_node *node);
-
-enum {
-    NGLI_PRECISION_AUTO,
-    NGLI_PRECISION_HIGH,
-    NGLI_PRECISION_MEDIUM,
-    NGLI_PRECISION_LOW,
-    NGLI_PRECISION_NB
-};
 
 struct variable_priv {
     union {
@@ -276,6 +283,8 @@ struct program_priv {
     struct hmap *properties;
     struct hmap *vert_out_vars;
     int nb_frag_output;
+
+    struct darray vert_out_vars_array; // pgcraft_iovar
 };
 
 extern const struct param_choices ngli_mipmap_filter_choices;
@@ -306,11 +315,13 @@ struct media_priv {
 
     struct sxplayer_ctx *player;
     struct sxplayer_frame *frame;
+    int nb_parents;
 
 #if defined(TARGET_ANDROID)
     struct texture *android_texture;
     struct android_surface *android_surface;
     struct android_handlerthread *android_handlerthread;
+    struct android_imagereader *android_imagereader;
 #endif
 };
 
@@ -330,6 +341,8 @@ struct identity_priv {
 };
 
 struct io_priv {
+    int precision_out;
+    int precision_in;
     int type;
 };
 

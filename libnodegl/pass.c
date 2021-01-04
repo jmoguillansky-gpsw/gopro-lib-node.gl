@@ -22,7 +22,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
 #include <stdint.h>
 #include <inttypes.h>
 
@@ -181,7 +180,7 @@ static int register_block(struct pass *s, const char *name, struct ngl_node *blo
      * Select buffer type. We prefer UBO over SSBO, but in the following
      * situations, UBO is not possible.
      */
-    int type = NGLI_TYPE_UNIFORM_BUFFER;
+    int type = block->type == NGLI_TYPE_NONE ? NGLI_TYPE_UNIFORM_BUFFER : block->type;
     if (block->layout == NGLI_BLOCK_LAYOUT_STD430) {
         LOG(DEBUG, "block %s has a std430 layout, declaring it as SSBO", name);
         type = NGLI_TYPE_STORAGE_BUFFER;
@@ -189,15 +188,16 @@ static int register_block(struct pass *s, const char *name, struct ngl_node *blo
         LOG(DEBUG, "block %s is larger than the max UBO size (%d > %d), declaring it as SSBO",
             name, block->size, limits->max_uniform_block_size);
         type = NGLI_TYPE_STORAGE_BUFFER;
-    } else {
-        const struct pass_params *params = &s->params;
-        if (params->properties) {
-            const struct ngl_node *resprops_node = ngli_hmap_get(params->properties, name);
-            if (resprops_node) {
-                const struct resourceprops_priv *resprops = resprops_node->priv_data;
-                if (resprops->variadic || resprops->writable)
-                    type = NGLI_TYPE_STORAGE_BUFFER;
-            }
+    }
+
+    const struct pass_params *params = &s->params;
+    if (params->properties) {
+        const struct ngl_node *resprops_node = ngli_hmap_get(params->properties, name);
+        if (resprops_node) {
+            const struct resourceprops_priv *resprops = resprops_node->priv_data;
+            if (resprops->variadic || resprops->writable)
+                type = NGLI_TYPE_STORAGE_BUFFER;
+            crafter_block.writable = resprops->writable;
         }
     }
 
@@ -436,10 +436,22 @@ int ngli_pass_prepare(struct pass *s)
 {
     struct ngl_ctx *ctx = s->ctx;
     struct gctx *gctx = ctx->gctx;
+    struct rnode *rnode = ctx->rnode_pos;
+
+    const int format = rnode->rendertarget_desc.depth_stencil.format;
+    if (rnode->graphicstate.depth_test && !ngli_format_has_depth(format)) {
+        LOG(ERROR, "depth testing is not support on rendertargets with no depth attachment");
+        return NGL_ERROR_INVALID_USAGE;
+    }
+
+    if (rnode->graphicstate.stencil_test && !ngli_format_has_stencil(format)) {
+        LOG(ERROR, "stencil operations are not support on rendertargets with no stencil attachment");
+        return NGL_ERROR_INVALID_USAGE;
+    }
 
     struct pipeline_graphics pipeline_graphics = s->pipeline_graphics;
-    pipeline_graphics.state = ctx->graphicstate;
-    pipeline_graphics.rt_desc = *ctx->rendertarget_desc;
+    pipeline_graphics.state = rnode->graphicstate;
+    pipeline_graphics.rt_desc = rnode->rendertarget_desc;
 
     struct pipeline_params pipeline_params = {
         .type          = s->pipeline_type,
@@ -474,7 +486,8 @@ int ngli_pass_prepare(struct pass *s)
     if (!desc->crafter)
         return NGL_ERROR_MEMORY;
 
-    int ret = ngli_pgcraft_craft(desc->crafter, &pipeline_params, &crafter_params);
+    struct pipeline_resource_params pipeline_resource_params = {0};
+    int ret = ngli_pgcraft_craft(desc->crafter, &pipeline_params, &pipeline_resource_params, &crafter_params);
     if (ret < 0)
         return ret;
 
@@ -483,6 +496,10 @@ int ngli_pass_prepare(struct pass *s)
         return NGL_ERROR_MEMORY;
 
     ret = ngli_pipeline_init(desc->pipeline, &pipeline_params);
+    if (ret < 0)
+        return ret;
+
+    ret = ngli_pipeline_set_resources(desc->pipeline, &pipeline_resource_params);
     if (ret < 0)
         return ret;
 
@@ -681,13 +698,27 @@ int ngli_pass_exec(struct pass *s)
         ngli_pipeline_update_uniform(pipeline, fields[NGLI_INFO_FIELD_SAMPLING_MODE].index, &layout);
     }
 
-    if (s->pipeline_type == NGLI_PIPELINE_TYPE_GRAPHICS)
+    if (s->pipeline_type == NGLI_PIPELINE_TYPE_GRAPHICS) {
+        if (ctx->begin_render_pass) {
+            struct gctx *gctx = ctx->gctx;
+            ngli_gctx_begin_render_pass(gctx, ctx->current_rendertarget);
+            ctx->begin_render_pass = 0;
+        }
+
         if (s->indices_buffer)
             ngli_pipeline_draw_indexed(pipeline, s->indices_buffer, s->indices_format, s->nb_indices, s->nb_instances);
         else
             ngli_pipeline_draw(pipeline, s->nb_vertices, s->nb_instances);
-    else
+    } else {
+        if (!ctx->begin_render_pass) {
+            struct gctx *gctx = ctx->gctx;
+            ngli_gctx_end_render_pass(gctx);
+            ctx->current_rendertarget = ctx->available_rendertargets[1];
+            ctx->begin_render_pass = 1;
+        }
+
         ngli_pipeline_dispatch(pipeline, params->nb_group_x, params->nb_group_y, params->nb_group_z);
+    }
 
     return 0;
 }

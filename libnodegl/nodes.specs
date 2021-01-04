@@ -210,53 +210,48 @@
     - [stencil_fail, select]
     - [stencil_depth_fail, select]
     - [stencil_depth_pass, select]
-    - [cull_face, bool]
-    - [cull_face_mode, flags]
+    - [cull_mode, select]
     - [scissor_test, bool]
     - [scissor, vec4]
 
 - Group:
     - [children, NodeList]
 
-- HUD:
-    - [child, Node]
-    - [measure_window, int]
-    - [refresh_rate, rational]
-    - [export_filename, string]
-    - [bg_color, vec4]
-    - [aspect_ratio, rational]
-
 - Identity:
 
-- IOInt:
+- _IOVar:
+    - [precision_out, select]
+    - [precision_in, select]
 
-- IOIVec2:
+- IOInt: _IOVar
 
-- IOIVec3:
+- IOIVec2: _IOVar
 
-- IOIVec4:
+- IOIVec3: _IOVar
 
-- IOUInt:
+- IOIVec4: _IOVar
 
-- IOUIvec2:
+- IOUInt: _IOVar
 
-- IOUIvec3:
+- IOUIvec2: _IOVar
 
-- IOUIvec4:
+- IOUIvec3: _IOVar
 
-- IOFloat:
+- IOUIvec4: _IOVar
 
-- IOVec2:
+- IOFloat: _IOVar
 
-- IOVec3:
+- IOVec2: _IOVar
 
-- IOVec4:
+- IOVec3: _IOVar
 
-- IOMat3:
+- IOVec4: _IOVar
 
-- IOMat4:
+- IOMat3: _IOVar
 
-- IOBool:
+- IOMat4: _IOVar
+
+- IOBool: _IOVar
 
 - Media:
     - [filename, string]
@@ -300,7 +295,6 @@
     - [samples, int]
     - [clear_color, vec4]
     - [features, flags]
-    - [vflip, bool]
 
 - ResourceProps:
     - [precision, select]
@@ -339,9 +333,6 @@
     - [valign, select]
     - [halign, select]
     - [aspect_ratio, rational]
-    - [min_filter, select]
-    - [mag_filter, select]
-    - [mipmap_filter, select]
 
 - Texture2D:
     - [format, select]
@@ -352,7 +343,6 @@
     - [mipmap_filter, select]
     - [wrap_s, select]
     - [wrap_t, select]
-    - [access, flags]
     - [data_src, Node]
     - [direct_rendering, bool]
 
@@ -367,7 +357,6 @@
     - [wrap_s, select]
     - [wrap_t, select]
     - [wrap_r, select]
-    - [access, flags]
     - [data_src, Node]
 
 - TextureCube:
@@ -379,7 +368,6 @@
     - [wrap_s, select]
     - [wrap_t, select]
     - [wrap_r, select]
-    - [access, flags]
     - [data_src, Node]
 
 - Time:
@@ -585,6 +573,9 @@
     - [buffer, Node]
     - [timebase, rational]
     - [time_anim, Node]
+
+- UniformBool:
+    - [value, bool]
 
 - UniformInt:
     - [value, int]

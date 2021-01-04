@@ -22,9 +22,9 @@
 
 import os
 import os.path as op
-import tempfile
 import json
 from PySide2 import QtCore
+from .misc import get_nodegl_tempdir
 
 
 class Config(QtCore.QObject):
@@ -52,10 +52,11 @@ class Config(QtCore.QObject):
             'info',
             'warning',
             'error',
+            'quiet',
         ],
         'backend': [
-            'gl',
-            'gles',
+            'opengl',
+            'opengles',
         ],
     }
 
@@ -68,13 +69,12 @@ class Config(QtCore.QObject):
             'framerate': (60, 1),
             'log_level': 'info',
             'clear_color': (0.0, 0.0, 0.0, 1.0),
-            'enable_hud': False,
-            'backend': 'gl',
+            'backend': 'opengl',
 
             # Export
             'export_width': 1280,
             'export_height': 720,
-            'export_filename': op.join(tempfile.gettempdir(), 'ngl-export.mp4'),
+            'export_filename': op.join(get_nodegl_tempdir(), 'ngl-export.mp4'),
             'export_extra_enc_args': '',
 
             # Medias
@@ -88,7 +88,7 @@ class Config(QtCore.QObject):
         config_filepath = self._get_config_filepath()
         if op.exists(config_filepath):
             with open(config_filepath) as f:
-                self._cfg.update(json.load(f))
+                self._cfg.update(self._sanitized_config(json.load(f)))
         else:
             self._needs_saving = True
 
@@ -97,10 +97,22 @@ class Config(QtCore.QObject):
         self._config_timer.timeout.connect(self._check_config)
         self._config_timer.start()
 
+    def _sanitized_config(self, cfg):
+        out_cfg = {}
+        for key, value in cfg.items():
+            allowed_values = self.CHOICES.get(key)
+            if isinstance(value, list):
+                value = tuple(value)
+            if allowed_values is None or value in allowed_values:
+                out_cfg[key] = value
+            else:
+                print(f'warning: {value} not allowed for {key}')
+        return out_cfg
+
     def _get_config_filepath(self):
         config_basedir = os.environ.get('XDG_DATA_HOME', op.expanduser('~/.local/share'))
         config_dir = op.join(config_basedir, 'node.gl')
-        return op.join(config_dir, 'viewer.json')
+        return op.join(config_dir, 'controller.json')
 
     @QtCore.Slot()
     def _check_config(self):
@@ -169,10 +181,6 @@ class Config(QtCore.QObject):
     @QtCore.Slot(str)
     def set_log_level(self, level):
         self._set_cfg('log_level', level)
-
-    @QtCore.Slot(bool)
-    def set_hud(self, hud):
-        self._set_cfg('enable_hud', hud)
 
     @QtCore.Slot(str)
     def set_backend(self, backend):

@@ -27,6 +27,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 import pynodegl as ngl
 
 from pynodegl_utils.config import Config
+from pynodegl_utils.control_widgets import control_to_widget
 
 
 class Toolbar(QtWidgets.QWidget):
@@ -38,7 +39,6 @@ class Toolbar(QtWidgets.QWidget):
     logLevelChanged = QtCore.Signal(str)
     clearColorChanged = QtCore.Signal(tuple)
     backendChanged = QtCore.Signal(str)
-    hudChanged = QtCore.Signal(bool)
 
     def __init__(self, config):
         super().__init__()
@@ -54,9 +54,6 @@ class Toolbar(QtWidgets.QWidget):
         self._scn_view.setModel(self._scn_mdl)
 
         self._current_scene_data = None
-
-        self._hud_chkbox = QtWidgets.QCheckBox('Enable HUD')
-        self._hud_chkbox.setChecked(config.get('enable_hud'))
 
         all_ar = config.CHOICES['aspect_ratio']
         default_ar = config.get('aspect_ratio')
@@ -115,8 +112,8 @@ class Toolbar(QtWidgets.QWidget):
         loglevel_hbox.addWidget(self._loglevel_cbbox)
 
         backend_names = {
-            'gl': 'OpenGL',
-            'gles': 'OpenGL ES',
+            'opengl': 'OpenGL',
+            'opengles': 'OpenGL ES',
         }
         all_backends = config.CHOICES['backend']
         default_backend = config.get('backend')
@@ -145,7 +142,6 @@ class Toolbar(QtWidgets.QWidget):
         self.reload_btn = QtWidgets.QPushButton('Force scripts reload')
 
         self._scene_toolbar_layout = QtWidgets.QVBoxLayout(self)
-        self._scene_toolbar_layout.addWidget(self._hud_chkbox)
         self._scene_toolbar_layout.addLayout(ar_hbox)
         self._scene_toolbar_layout.addLayout(far_hbox)
         self._scene_toolbar_layout.addLayout(samples_hbox)
@@ -158,7 +154,6 @@ class Toolbar(QtWidgets.QWidget):
 
         self._scn_view.clicked.connect(self._scn_view_selected)
         self._scn_view.activated.connect(self._scn_view_selected)
-        self._hud_chkbox.stateChanged.connect(self._hud_chkbox_changed)
         self._ar_cbbox.currentIndexChanged.connect(self._set_aspect_ratio)
         self._samples_cbbox.currentIndexChanged.connect(self._set_samples)
         self._fr_cbbox.currentIndexChanged.connect(self._set_frame_rate)
@@ -182,8 +177,9 @@ class Toolbar(QtWidgets.QWidget):
 
     def _get_opts_widget_from_specs(self, widgets_specs):
         widgets = []
-        for name, controller in widgets_specs:
-            widget = controller.get_widget(name)
+        for key, default, ctl_id, ctl_data in widgets_specs:
+            widget_cls = control_to_widget[ctl_id]
+            widget = widget_cls(key, default, **ctl_data)
             widget.needSceneReload.connect(self._widget_scene_reload)
             widgets.append(widget)
         if not widgets:
@@ -204,7 +200,6 @@ class Toolbar(QtWidgets.QWidget):
                 'framerate': choices['framerate'][self._fr_cbbox.currentIndex()],
                 'samples': choices['samples'][self._samples_cbbox.currentIndex()],
                 'extra_args': self._scene_extra_args,
-                'enable_hud': self._hud_chkbox.isChecked(),
                 'clear_color': self._clear_color,
                 'backend': choices['backend'][self._backend_cbbox.currentIndex()],
         }
@@ -285,11 +280,6 @@ class Toolbar(QtWidgets.QWidget):
                 self._far_lbl2.setVisible(False)
         except ValueError:
             pass
-
-    @QtCore.Slot()
-    def _hud_chkbox_changed(self):
-        self.hudChanged.emit(self._hud_chkbox.isChecked())
-        self._load_current_scene()
 
     @QtCore.Slot(int)
     def _set_loglevel(self, index):

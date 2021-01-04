@@ -19,7 +19,6 @@
  * under the License.
  */
 
-
 #ifndef COMMON_H
 #define COMMON_H
 
@@ -31,8 +30,11 @@
 #define DEFAULT_HEIGHT 360
 
 int64_t gettime(void);
+int64_t gettime_relative(void);
 double clipd(double v, double min, double max);
 int clipi(int v, int min, int max);
+int64_t clipi64(int64_t v, int64_t min, int64_t max);
 void get_viewport(int width, int height, const int *aspect_ratio, int *vp);
+char *get_text_file_content(const char *filename);
 
 #endif

@@ -75,11 +75,8 @@ enum {
     NGLI_CULL_MODE_NONE,
     NGLI_CULL_MODE_FRONT_BIT,
     NGLI_CULL_MODE_BACK_BIT,
-    NGLI_CULL_MODE_FRONT_AND_BACK,
     NGLI_CULL_MODE_NB
 };
-
-NGLI_STATIC_ASSERT(cull_mode, (NGLI_CULL_MODE_FRONT_BIT | NGLI_CULL_MODE_BACK_BIT) == NGLI_CULL_MODE_FRONT_AND_BACK);
 
 enum {
     NGLI_COLOR_COMPONENT_R_BIT = 1 << 0,
@@ -112,12 +109,35 @@ struct graphicstate {
     int stencil_depth_fail;
     int stencil_depth_pass;
 
-    int cull_face;
-    int cull_face_mode;
+    int cull_mode;
 
     int scissor_test;
 };
 
-void ngli_graphicstate_init(struct graphicstate *s);
+#define NGLI_GRAPHICSTATE_DEFAULTS (struct graphicstate) { \
+    .blend              = 0,                               \
+    .blend_src_factor   = NGLI_BLEND_FACTOR_ONE,           \
+    .blend_dst_factor   = NGLI_BLEND_FACTOR_ZERO,          \
+    .blend_src_factor_a = NGLI_BLEND_FACTOR_ONE,           \
+    .blend_dst_factor_a = NGLI_BLEND_FACTOR_ZERO,          \
+    .blend_op           = NGLI_BLEND_OP_ADD,               \
+    .blend_op_a         = NGLI_BLEND_OP_ADD,               \
+    .color_write_mask   = NGLI_COLOR_COMPONENT_R_BIT       \
+                        | NGLI_COLOR_COMPONENT_G_BIT       \
+                        | NGLI_COLOR_COMPONENT_B_BIT       \
+                        | NGLI_COLOR_COMPONENT_A_BIT,      \
+    .depth_test         = 0,                               \
+    .depth_write_mask   = 1,                               \
+    .depth_func         = NGLI_COMPARE_OP_LESS,            \
+    .stencil_test       = 0,                               \
+    .stencil_write_mask = 1,                               \
+    .stencil_func       = NGLI_COMPARE_OP_ALWAYS,          \
+    .stencil_ref        = 0,                               \
+    .stencil_read_mask  = 1,                               \
+    .stencil_fail       = NGLI_STENCIL_OP_KEEP,            \
+    .stencil_depth_fail = NGLI_STENCIL_OP_KEEP,            \
+    .stencil_depth_pass = NGLI_STENCIL_OP_KEEP,            \
+    .cull_mode          = NGLI_CULL_MODE_NONE,             \
+}                                                          \
 
 #endif

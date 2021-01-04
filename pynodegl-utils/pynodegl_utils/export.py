@@ -21,14 +21,13 @@
 
 import os
 import os.path as op
-import tempfile
 import subprocess
 
 import pynodegl as ngl
 from PySide2 import QtGui, QtCore
 
 from .com import query_inplace
-from .misc import get_backend, get_viewport
+from .misc import get_backend, get_viewport, get_nodegl_tempdir
 
 
 class Exporter(QtCore.QThread):
@@ -51,7 +50,7 @@ class Exporter(QtCore.QThread):
         filename, width, height = self._filename, self._width, self._height
 
         if filename.endswith('gif'):
-            palette_filename = op.join(tempfile.gettempdir(), 'palette.png')
+            palette_filename = op.join(get_nodegl_tempdir(), 'palette.png')
             pass1_args = ['-vf', 'palettegen']
             pass2_args = self._extra_enc_args + ['-i', palette_filename, '-lavfi', 'paletteuse']
             ok = self._export(palette_filename, width, height, pass1_args)
@@ -91,8 +90,8 @@ class Exporter(QtCore.QThread):
         capture_buffer = bytearray(width * height * 4)
 
         # node.gl context
-        ngl_viewer = ngl.Context()
-        ngl_viewer.configure(
+        ctx = ngl.Context()
+        ctx.configure(
             platform=ngl.PLATFORM_AUTO,
             backend=get_backend(cfg['backend']),
             offscreen=1,
@@ -103,10 +102,10 @@ class Exporter(QtCore.QThread):
             clear_color=cfg['clear_color'],
             capture_buffer=capture_buffer,
         )
-        ngl_viewer.set_scene_from_string(cfg['scene'])
+        ctx.set_scene_from_string(cfg['scene'])
 
         if self._time is not None:
-            ngl_viewer.draw(self._time)
+            ctx.draw(self._time)
             os.write(fd_w, capture_buffer)
             self.progressed.emit(100)
         else:
@@ -116,7 +115,7 @@ class Exporter(QtCore.QThread):
                 if self._cancelled:
                     break
                 time = i * fps[1] / float(fps[0])
-                ngl_viewer.draw(time)
+                ctx.draw(time)
                 os.write(fd_w, capture_buffer)
                 self.progressed.emit(i*100 / nb_frame)
             self.progressed.emit(100)

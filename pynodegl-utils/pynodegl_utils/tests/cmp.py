@@ -21,9 +21,10 @@
 #
 
 import os
+import os.path as op
 import difflib
 import pynodegl as ngl
-from pynodegl_utils.misc import get_backend
+from pynodegl_utils.misc import get_backend, get_nodegl_tempdir
 
 
 class CompareBase:
@@ -36,7 +37,7 @@ class CompareBase:
     def deserialize(data):
         return data
 
-    def get_out_data(self):
+    def get_out_data(self, debug=False, debug_func=None):
         raise NotImplementedError
 
     def compare_data(self, test_name, ref_data, out_data):
@@ -51,6 +52,16 @@ class CompareBase:
             err.append('{} fail:\n{}'.format(test_name, diff))
         return err
 
+    @staticmethod
+    def dump_image(img, dump_index, func_name=None):
+        test_tmpdir = op.join(get_nodegl_tempdir(), 'tests')
+        if not op.exists(test_tmpdir):
+            os.makedirs(test_tmpdir)
+        filename = op.join(test_tmpdir, f'{func_name}_{dump_index:03}.png')
+        print(f'Dumping output image to {filename}')
+        img.save(filename)
+        dump_index += 1
+
 
 class CompareSceneBase(CompareBase):
 
@@ -63,7 +74,6 @@ class CompareSceneBase(CompareBase):
                  clear_color=(0.0, 0.0, 0.0, 1.0),
                  exercise_serialization=True,
                  exercise_dot=True,
-                 scene_wrap=None,
                  samples=0,
                  **scene_kwargs):
         self._width = width
@@ -75,8 +85,9 @@ class CompareSceneBase(CompareBase):
         self._scene_kwargs = scene_kwargs
         self._exercise_serialization = exercise_serialization
         self._exercise_dot = exercise_dot
-        self._scene_wrap = scene_wrap
         self._samples = samples
+        self._hud = 0
+        self._hud_export_filename = None
 
     def render_frames(self):
         # We make sure the lists of medias is explicitely empty. If we don't a
@@ -94,30 +105,29 @@ class CompareSceneBase(CompareBase):
         scene = ret['scene']
 
         capture_buffer = bytearray(width * height * 4)
-        viewer = ngl.Context()
-        assert viewer.configure(offscreen=1, width=width, height=height,
-                                backend=get_backend(backend) if backend else ngl.BACKEND_AUTO,
-                                samples=self._samples,
-                                clear_color=self._clear_color,
-                                capture_buffer=capture_buffer) == 0
+        ctx = ngl.Context()
+        assert ctx.configure(offscreen=1, width=width, height=height,
+                             backend=get_backend(backend) if backend else ngl.BACKEND_AUTO,
+                             samples=self._samples,
+                             clear_color=self._clear_color,
+                             capture_buffer=capture_buffer,
+                             hud=self._hud,
+                             hud_export_filename=self._hud_export_filename) == 0
         timescale = duration / float(self._nb_keyframes)
-
-        if self._scene_wrap:
-            scene = self._scene_wrap(scene)
 
         if self._exercise_dot:
             assert scene.dot()
 
         if self._exercise_serialization:
             scene_str = scene.serialize()
-            viewer.set_scene_from_string(scene_str)
+            ctx.set_scene_from_string(scene_str)
         else:
-            viewer.set_scene(scene)
+            ctx.set_scene(scene)
 
         for t_id in range(self._nb_keyframes):
             if self._keyframes_callback:
                 self._keyframes_callback(t_id)
-            viewer.draw(t_id * timescale)
+            ctx.draw(t_id * timescale)
 
             yield (width, height, capture_buffer)
 

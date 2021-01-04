@@ -27,9 +27,34 @@ import pynodegl as ngl
 from pynodegl_utils.misc import scene
 from pynodegl_utils.toolbox.colors import COLORS
 from pynodegl_utils.toolbox.colors import get_random_color_buffer
+from pynodegl_utils.tests.cmp_cuepoints import test_cuepoints
 from pynodegl_utils.tests.cmp_fingerprint import test_fingerprint
 from pynodegl_utils.toolbox.shapes import equilateral_triangle_coords
 from pynodegl_utils.toolbox.grid import autogrid_simple
+
+
+@test_cuepoints(points=dict(bl=(-1, -1), br=(1, -1), tr=(1, 1), tl=(-1, 1), c=(0, 0)), tolerance=5)
+@scene()
+def shape_precision_iovar(cfg):
+    cfg.aspect_ratio = (1, 1)
+    vert = '''
+void main()
+{
+    ngl_out_pos = ngl_projection_matrix * ngl_modelview_matrix * ngl_position;
+    color = vec4((ngl_out_pos.xy + 1.0) * .5, 1.0 - (ngl_out_pos.x + 1.0) * .5 - (ngl_out_pos.y + 1.0) * .5, 1.0);
+}
+'''
+    frag = '''
+void main()
+{
+    ngl_out_color = color;
+}
+'''
+    program = ngl.Program(vertex=vert, fragment=frag)
+    program.update_vert_out_vars(color=ngl.IOVec4(precision_out='high', precision_in='low'))
+    geometry = ngl.Quad(corner=(-1, -1, 0), width=(2, 0, 0), height=(0, 2, 0))
+    scene = ngl.Render(geometry, program)
+    return scene
 
 
 def _render_shape(cfg, geometry, color):
@@ -158,60 +183,6 @@ def shape_diamond_colormask(cfg):
     return autogrid_simple(scenes)
 
 
-def _shape_geometry_rtt(cfg, depth=False, samples=0):
-    w, h = 640, 480
-
-    scene = _shape_geometry(cfg, set_normals=True)
-
-    if depth:
-        scene = ngl.GraphicConfig(scene, depth_test=True)
-
-    texture = ngl.Texture2D()
-    texture.set_width(w)
-    texture.set_height(h)
-
-    rtt = ngl.RenderToTexture(scene)
-    rtt.add_color_textures(texture)
-
-    if depth:
-        texture = ngl.Texture2D()
-        texture.set_format('auto_depth')
-        texture.set_width(w)
-        texture.set_height(h)
-        rtt.set_depth_texture(texture)
-    else:
-        rtt.set_clear_color(*COLORS['cgreen'])
-
-    if samples:
-        rtt.set_samples(samples)
-
-    quad = ngl.Quad((-1, -1, 0), (2, 0, 0), (0, 2, 0))
-    program = ngl.Program(vertex=cfg.get_vert('texture'), fragment=cfg.get_frag('texture'))
-    program.update_vert_out_vars(var_tex0_coord=ngl.IOVec2(), var_uvcoord=ngl.IOVec2())
-    render = ngl.Render(quad, program)
-    render.update_frag_resources(tex0=texture)
-
-    return ngl.Group(children=(rtt, render))
-
-
-@test_fingerprint()
-@scene()
-def shape_geometry_rtt(cfg):
-    return _shape_geometry_rtt(cfg)
-
-
-@test_fingerprint()
-@scene()
-def shape_geometry_rtt_depth(cfg):
-    return _shape_geometry_rtt(cfg, depth=True)
-
-
-@test_fingerprint()
-@scene()
-def shape_geometry_rtt_samples(cfg):
-    return _shape_geometry_rtt(cfg, samples=4)
-
-
 def _get_morphing_coordinates(n, x_off, y_off):
     coords = [(random.uniform(0, 1) + x_off,
                random.uniform(0, 1) + y_off, 0) for i in range(n - 1)]
@@ -237,7 +208,7 @@ def shape_morphing(cfg, n=6):
     vertices = ngl.AnimatedBufferVec3(vertices_animkf)
 
     geom = ngl.Geometry(vertices)
-    geom.set_topology('triangle_fan')
+    geom.set_topology('triangle_strip')
     p = ngl.Program(vertex=cfg.get_vert('color'), fragment=cfg.get_frag('color'))
     render = ngl.Render(geom, p)
     render.update_frag_resources(color=ngl.UniformVec4(COLORS['cyan']))
@@ -273,7 +244,7 @@ def _get_cropboard_function(set_indices=False):
         translate_b_buffer = array.array('f')
 
         if set_indices:
-            indices = array.array('H', [0, 2, 1, 3])
+            indices = array.array('H', [0, 2, 1, 1, 3, 0])
             indices_buffer = ngl.BufferUShort(data=indices)
 
             vertices = array.array('f', [
@@ -293,8 +264,7 @@ def _get_cropboard_function(set_indices=False):
             vertices_buffer = ngl.BufferVec3(data=vertices)
             uvcoords_buffer = ngl.BufferVec2(data=uvcoords)
 
-            q = ngl.Geometry(topology='triangle_fan',
-                             vertices=vertices_buffer,
+            q = ngl.Geometry(vertices=vertices_buffer,
                              uvcoords=uvcoords_buffer,
                              indices=indices_buffer)
         else:
@@ -367,3 +337,30 @@ def shape_triangles_mat4_attribute(cfg):
     render.update_instance_attributes(matrix=matrices)
     render.update_frag_resources(color=ngl.UniformVec4(value=COLORS['orange']))
     return render
+
+
+def _get_shape_scene(cfg, shape, cull_mode):
+    cfg.aspect_ratio = (1, 1)
+
+    geometry_cls = dict(
+        triangle=ngl.Triangle,
+        quad=ngl.Quad,
+        circle=ngl.Circle,
+    )
+    geometry = geometry_cls[shape]()
+
+    node = _render_shape(cfg, geometry, COLORS['sgreen'])
+    return ngl.GraphicConfig(node, cull_mode=cull_mode)
+
+
+def _get_shape_function(shape, cull_mode):
+    @test_fingerprint()
+    @scene()
+    def shape_function(cfg):
+        return _get_shape_scene(cfg, shape, cull_mode)
+    return shape_function
+
+
+for shape in ('triangle', 'quad', 'circle'):
+    for cull_mode in ('front', 'back'):
+        globals()['shape_' + shape + '_cull_' + cull_mode] = _get_shape_function(shape, cull_mode)
